@@ -14,14 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sentry.provider.common;
+package org.apache.sentry.core.model.kafka;
+
+import org.apache.sentry.core.common.Authorizable;
+
 /**
- * Represent which component being authorized by Sentry
- * using generic model
+ * This interface represents authorizable resource in the Kafka component.
+ * It used conjunction with the generic authorization model(SENTRY-398).
  */
-public class AuthorizationComponent{
-  public static final String Search = "solr";
-  public static final String SQOOP = "sqoop";
-  public static final String KAFKA = "kafka";
-  
+public interface KafkaAuthorizable extends Authorizable {
+  public static final String ALL = "*";
+  public enum AuthorizableType {
+    CLUSTER,
+    SERVER,
+    TOPIC,
+    CONSUMERGROUP
+  };
+
+  public AuthorizableType getAuthzType();
 }

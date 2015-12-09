@@ -14,14 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sentry.provider.common;
-/**
- * Represent which component being authorized by Sentry
- * using generic model
- */
-public class AuthorizationComponent{
-  public static final String Search = "solr";
-  public static final String SQOOP = "sqoop";
-  public static final String KAFKA = "kafka";
-  
+package org.apache.sentry.tests.e2e.kafka;
+
+import java.io.File;
+
+public class TestUtils {
+    public static void delete(File file) {
+        if (file == null)
+            return;
+
+        if (file.isDirectory()) {
+            final File[] children = file.listFiles();
+            if (children == null || children.length == 0) {
+                for (File child : children) {
+                    delete(child);
+                }
+            }
+            file.delete();
+        } else {
+            file.delete();
+        }
+    }
 }

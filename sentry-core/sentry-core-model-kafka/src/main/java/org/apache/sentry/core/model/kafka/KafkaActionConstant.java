@@ -14,14 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sentry.provider.common;
-/**
- * Represent which component being authorized by Sentry
- * using generic model
- */
-public class AuthorizationComponent{
-  public static final String Search = "solr";
-  public static final String SQOOP = "sqoop";
-  public static final String KAFKA = "kafka";
-  
+package org.apache.sentry.core.model.kafka;
+
+public class KafkaActionConstant {
+
+  public static final String ALL = "*";
+  public static final String ALL_NAME = "ALL";
+  public static final String READ = "read";
+  public static final String WRITE = "write";
+  public static final String CREATE = "create";
+  public static final String DELETE = "delete";
+  public static final String ALTER = "alter";
+  public static final String DESCRIBE = "describe";
+  public static final String CLUSTER_ACTION = "clusteraction";
+
+  public static final String actionName = "action";
 }

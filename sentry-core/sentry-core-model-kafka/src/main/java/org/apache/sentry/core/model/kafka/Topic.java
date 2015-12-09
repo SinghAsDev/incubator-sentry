@@ -14,14 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.sentry.provider.common;
+package org.apache.sentry.core.model.kafka;
 /**
- * Represent which component being authorized by Sentry
- * using generic model
+ * Represents the Topic authorizable in the Kafka model
  */
-public class AuthorizationComponent{
-  public static final String Search = "solr";
-  public static final String SQOOP = "sqoop";
-  public static final String KAFKA = "kafka";
-  
+public class Topic implements KafkaAuthorizable {
+  /**
+   * Represents all topics
+   */
+  public static Topic ALL = new Topic(KafkaAuthorizable.ALL);
+
+  private String name;
+  public Topic(String name) {
+    this.name = name;
+  }
+
+  @Override
+  public AuthorizableType getAuthzType() {
+    return AuthorizableType.TOPIC;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public String getTypeName() {
+    return getAuthzType().name();
+  }
 }
