@@ -17,6 +17,7 @@
 package org.apache.sentry.tests.e2e.kafka;
 
 import junit.framework.Assert;
+import org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,6 +33,9 @@ public class SimpleTest {
 
     @BeforeClass
     public static void setUp() throws Exception {
+        // Workaround for SentryKafkaAuthorizer to be added to classpath
+        Class.forName("org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer");
+
         KAFKA_TEST_SERVER = new KafkaTestServer();
         KAFKA_TEST_SERVER.start();
     }
@@ -43,13 +47,6 @@ public class SimpleTest {
 
     @Test
     public void serverStartAndShutdown() {
-        ClassLoader cl = ClassLoader.getSystemClassLoader();
-
-        URL[] urls = ((URLClassLoader)cl).getURLs();
-
-        for(URL url: urls){
-            LOGGER.info(url.getFile());
-        }
         Assert.assertTrue("Success", true);
     }
 }

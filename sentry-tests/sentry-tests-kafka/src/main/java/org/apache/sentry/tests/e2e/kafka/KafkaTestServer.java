@@ -91,6 +91,7 @@ public class KafkaTestServer {
         props.put("controlled.shutdown.retry.backoff.ms", "100");
         props.put("port", kafkaPort);
         props.put("authorizer.class.name", "org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer");
+        props.put("sentry.kafka.site.url", "file://" + KafkaTestServer.class.getResource("/sentry-site.xml").getPath());
     }
 
     private void createKafkaServer() {
