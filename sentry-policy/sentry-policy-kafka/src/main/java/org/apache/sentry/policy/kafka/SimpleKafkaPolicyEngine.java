@@ -43,6 +43,7 @@ public class SimpleKafkaPolicyEngine implements PolicyEngine {
     context.setValidators(ImmutableList.<PrivilegeValidator>of(new ResourceRequiredMatch()));
     this.providerBackend.initialize(context);
   }
+
   @Override
   public PrivilegeFactory getPrivilegeFactory() {
     return new KafkaWildcardPrivilege.Factory();

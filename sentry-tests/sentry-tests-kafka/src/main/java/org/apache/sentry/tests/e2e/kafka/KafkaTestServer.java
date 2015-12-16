@@ -81,7 +81,7 @@ public class KafkaTestServer {
     }
 
     private void generateRequiredKafkaProps(Properties props) {
-        props.put("listeners", "PLAINTEXT://localhost:" + kafkaPort);
+        props.put("listeners", "SSL://localhost:" + kafkaPort);
         props.put("log.dir", getTempDirectory().toAbsolutePath().toString());
         props.put("zookeeper.connect", "127.0.0.1:" + zkPort);
         props.put("replica.socket.timeout.ms", "1500");
@@ -92,6 +92,15 @@ public class KafkaTestServer {
         props.put("port", kafkaPort);
         props.put("authorizer.class.name", "org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer");
         props.put("sentry.kafka.site.url", "file://" + KafkaTestServer.class.getResource("/sentry-site.xml").getPath());
+        props.put("allow.everyone.if.no.acl.found", "true");
+        props.put("ssl.keystore.location", KafkaTestServer.class.getResource("/test.keystore.jks").getPath());
+        props.put("ssl.keystore.password", "test-ks-passwd");
+        props.put("ssl.key.password", "test-key-passwd");
+        props.put("ssl.truststore.location", KafkaTestServer.class.getResource("/test.truststore.jks").getPath());
+        props.put("ssl.truststore.password", "test-ts-passwd");
+        props.put("security.inter.broker.protocol", "SSL");
+        props.put("ssl.client.auth", "required");
+        //props.put("principal.builder.class", "org.apache.sentry.tests.e2e.kafka.CustomPrincipalBuilder");
     }
 
     private void createKafkaServer() {
@@ -107,5 +116,9 @@ public class KafkaTestServer {
         } catch (Exception e) {
             LOGGER.error("Failed to create testing zookeeper server.", e);
         }
+    }
+
+    public String getBootstrapServers() {
+        return "localhost:" + kafkaPort;
     }
 }

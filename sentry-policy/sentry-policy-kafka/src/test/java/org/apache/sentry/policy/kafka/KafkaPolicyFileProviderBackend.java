@@ -30,6 +30,6 @@ public class KafkaPolicyFileProviderBackend extends SimpleKafkaPolicyEngine {
   private static final Logger LOGGER = LoggerFactory.getLogger(KafkaPolicyFileProviderBackend.class);
   public KafkaPolicyFileProviderBackend(String resource) throws IOException {
     super(new SimpleFileProviderBackend(new Configuration(), resource));
-    LOGGER.warn("The DB providerbackend is the preferred option over file providerbackend as the kafka policy engine");
+    LOGGER.warn("The DB provider backend is the preferred option over file provider backend as the kafka policy engine");
   }
 }

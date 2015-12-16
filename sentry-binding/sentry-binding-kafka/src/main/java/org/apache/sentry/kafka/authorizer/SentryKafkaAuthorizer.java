@@ -50,11 +50,11 @@ public class SentryKafkaAuthorizer implements Authorizer {
   @Override
   public boolean authorize(RequestChannel.Session session, Operation operation,
                            Resource resource) {
-    LOG.info("Authorizing" + session + operation + resource);
+    LOG.info("Authorizing " + session + operation + resource);
     // If resource type if consumer group, then allow it by default
-    if (resource.resourceType().name().equals(Group.name())) {
+    /*if (resource.resourceType().name().equals(Group.name())) {
       return true;
-    }
+    }*/
     return binding.authorize(session, operation, resource);
   }
 

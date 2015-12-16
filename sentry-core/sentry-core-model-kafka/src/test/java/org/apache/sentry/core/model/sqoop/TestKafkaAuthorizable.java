@@ -56,6 +56,6 @@ public class TestKafkaAuthorizable {
     Assert.assertEquals(topic.getAuthzType(), AuthorizableType.TOPIC);
 
     ConsumerGroup consumerGroup = new ConsumerGroup("consumerGroup1");
-    Assert.assertEquals(consumerGroup.getAuthzType(), AuthorizableType.CONSUMERGROUP);
+    Assert.assertEquals(consumerGroup.getAuthzType(), AuthorizableType.GROUP);
   }
 }

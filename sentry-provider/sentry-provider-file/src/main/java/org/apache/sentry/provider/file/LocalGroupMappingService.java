@@ -50,7 +50,7 @@ import com.google.common.collect.Sets;
  * usr1
  * usr2
  *
- * [[usr1]
+ * [usr1]
  * group1
  * group11
  *

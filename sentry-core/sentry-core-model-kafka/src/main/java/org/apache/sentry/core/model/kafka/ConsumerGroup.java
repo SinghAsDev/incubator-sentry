@@ -31,7 +31,7 @@ public class ConsumerGroup implements KafkaAuthorizable {
 
   @Override
   public AuthorizableType getAuthzType() {
-    return AuthorizableType.CONSUMERGROUP;
+    return AuthorizableType.GROUP;
   }
 
   @Override

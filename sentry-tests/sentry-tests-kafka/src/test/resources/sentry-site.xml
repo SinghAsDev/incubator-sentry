@@ -20,11 +20,7 @@
 <configuration>
   <property>
     <name>sentry.kafka.provider</name>
-    <value>org.apache.sentry.provider.common.HadoopGroupResourceAuthorizationProvider</value>
-  </property>
-  <property>
-    <name>hadoop.security.group.mapping</name>
-    <value>test</value>
+    <value>org.apache.sentry.provider.file.LocalGroupResourceAuthorizationProvider</value>
   </property>
   <property>
     <name>sentry.kafka.provider.resource</name>

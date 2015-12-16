@@ -28,7 +28,7 @@ public interface KafkaAuthorizable extends Authorizable {
     CLUSTER,
     SERVER,
     TOPIC,
-    CONSUMERGROUP
+    GROUP
   };
 
   public AuthorizableType getAuthzType();

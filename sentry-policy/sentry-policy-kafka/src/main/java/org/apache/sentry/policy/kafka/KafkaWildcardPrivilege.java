@@ -119,4 +119,13 @@ public class KafkaWildcardPrivilege implements Privilege {
     return false;
 
   }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    for(KeyValue kv: this.parts) {
+      sb.append(kv.getKey() + "=" + kv.getValue() + "->");
+    }
+    return sb.toString();
+  }
 }
