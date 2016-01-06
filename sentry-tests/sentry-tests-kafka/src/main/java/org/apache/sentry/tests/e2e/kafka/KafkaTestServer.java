@@ -21,6 +21,7 @@ import kafka.server.KafkaServerStartable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.nio.file.Files;
@@ -34,10 +35,12 @@ public class KafkaTestServer {
     private int kafkaPort = -1;
     private EmbeddedZkServer zkServer = null;
     private KafkaServerStartable kafkaServer = null;
+    private File sentrySitePath = null;
 
-    public KafkaTestServer() throws Exception {
-        zkPort = getFreePort();
-        kafkaPort = getFreePort();
+    public KafkaTestServer(File sentrySitePath) throws Exception {
+        this.zkPort = getFreePort();
+        this.kafkaPort = getFreePort();
+        this.sentrySitePath = sentrySitePath;
         createZkServer();
         createKafkaServer();
     }
@@ -60,7 +63,7 @@ public class KafkaTestServer {
         }
     }
 
-    private static int getFreePort() {
+    public static int getFreePort() {
         ServerSocket zkServerSocket = null;
         try {
             zkServerSocket = new ServerSocket(0);
@@ -91,7 +94,7 @@ public class KafkaTestServer {
         props.put("controlled.shutdown.retry.backoff.ms", "100");
         props.put("port", kafkaPort);
         props.put("authorizer.class.name", "org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer");
-        props.put("sentry.kafka.site.url", "file://" + KafkaTestServer.class.getResource("/sentry-site.xml").getPath());
+        props.put("sentry.kafka.site.url", "file://" + sentrySitePath.getAbsolutePath());
         props.put("allow.everyone.if.no.acl.found", "true");
         props.put("ssl.keystore.location", KafkaTestServer.class.getResource("/test.keystore.jks").getPath());
         props.put("ssl.keystore.password", "test-ks-passwd");

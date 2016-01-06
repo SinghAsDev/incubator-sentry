@@ -54,6 +54,7 @@ public class KafkaAuthBinding {
 
     public KafkaAuthBinding(Configuration authConf) throws Exception {
         this.authConf = authConf;
+        //this.authConf.set(AuthzConfVars.AUTHZ_INSTANCE_NAME.getVar(), serverName);
         this.authProvider = createAuthProvider();
     }
 
@@ -79,7 +80,7 @@ public class KafkaAuthBinding {
         String policyEngineName =
             authConf.get(AuthzConfVars.AUTHZ_POLICY_ENGINE.getVar(),
                 AuthzConfVars.AUTHZ_POLICY_ENGINE.getDefault());
-        String instanceName = authConf.get("KAFKA-" + AuthzConfVars.AUTHZ_INSTANCE_NAME.getVar());
+        String instanceName = authConf.get(AuthzConfVars.AUTHZ_INSTANCE_NAME.getVar());
         if (resourceName != null && resourceName.startsWith("classpath:")) {
             String resourceFileName = resourceName.substring("classpath:".length());
             resourceName = AuthorizationProvider.class.getClassLoader().getResource(resourceFileName).getPath();
