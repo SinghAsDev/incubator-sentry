@@ -180,7 +180,7 @@ public class AbstractKafkaSentryTestBase {
       sentryClient.createRoleIfNotExist(ADMIN_USER, ADMIN_ROLE, COMPONENT);
       sentryClient.addRoleToGroups(ADMIN_USER, ADMIN_ROLE, COMPONENT, Sets.newHashSet(ADMIN_GROUP));
       final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-      authorizables.add(new TAuthorizable(KafkaAuthorizable.AuthorizableType.CLUSTER.name(), "*"));
+      authorizables.add(new TAuthorizable(KafkaAuthorizable.AuthorizableType.CLUSTER.name(), "cluster"));
       sentryClient.grantPrivilege(ADMIN_USER, ADMIN_ROLE, COMPONENT,
           new TSentryPrivilege(COMPONENT, "", authorizables,
               KafkaActionConstant.ALL));
