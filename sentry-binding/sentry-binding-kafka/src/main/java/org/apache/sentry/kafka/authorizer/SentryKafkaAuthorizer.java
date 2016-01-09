@@ -19,7 +19,6 @@ package org.apache.sentry.kafka.authorizer;
 import kafka.network.RequestChannel;
 import kafka.security.auth.Acl;
 import kafka.security.auth.Authorizer;
-import kafka.security.auth.Group;
 import kafka.security.auth.Operation;
 import kafka.security.auth.Resource;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
@@ -34,6 +33,9 @@ import scala.collection.immutable.HashSet;
 import scala.collection.immutable.Map;
 import scala.collection.immutable.Set;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SentryKafkaAuthorizer implements Authorizer {
   
   private static Logger LOG =
@@ -42,6 +44,7 @@ public class SentryKafkaAuthorizer implements Authorizer {
   KafkaAuthBinding binding;
   
   String sentry_site = null;
+  List<KafkaPrincipal> super_users = null;
   
   public SentryKafkaAuthorizer() {
     
@@ -50,12 +53,23 @@ public class SentryKafkaAuthorizer implements Authorizer {
   @Override
   public boolean authorize(RequestChannel.Session session, Operation operation,
                            Resource resource) {
-    LOG.info("Authorizing " + session + operation + resource);
-    // If resource type if consumer group, then allow it by default
-    /*if (resource.resourceType().name().equals(Group.name())) {
+    LOG.debug("Authorizing Session: " + session + " for Operation: " + operation + " on Resource: " + resource);
+    final KafkaPrincipal user = session.principal();
+    if (isSuperUser(user)) {
+      LOG.debug("Allowing SuperUser: " + user + " in " + session + " for Operation: " + operation + " on Resource: " + resource);
       return true;
-    }*/
+    }
+    LOG.debug("User: " + user + " is not a SuperUser");
     return binding.authorize(session, operation, resource);
+  }
+
+  private boolean isSuperUser(KafkaPrincipal user) {
+    for (KafkaPrincipal superUser : super_users) {
+      if (superUser.equals(user)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
@@ -100,7 +114,20 @@ public class SentryKafkaAuthorizer implements Authorizer {
   @Override
   public void configure(java.util.Map<String, ?> configs) {
     sentry_site = configs.get(KafkaAuthConf.SENTRY_KAFKA_SITE_URL).toString();
+    getSuperUsers(configs.get(KafkaAuthConf.KAFKA_SUPER_USERS).toString());
     LOG.info("Configuring Sentry KafkaAuthorizer: " + sentry_site);
     this.binding = KafkaAuthBindingSingleton.getInstance(sentry_site).getAuthBinding();
+  }
+
+  private void getSuperUsers(String kafkaSuperUsers) {
+    super_users = new ArrayList<>();
+    String[] superUsers = kafkaSuperUsers.split(";");
+    for (String superUser : superUsers) {
+      if (!superUser.isEmpty()) {
+        final String trimmedUser = superUser.trim();
+        super_users.add(KafkaPrincipal.fromString(trimmedUser));
+        LOG.debug("Adding " + trimmedUser + " to list of Kafka SuperUsers.");
+      }
+    }
   }
 }

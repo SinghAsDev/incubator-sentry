@@ -26,8 +26,9 @@ public class KafkaAuthConf extends Configuration {
    * Configuration key used in kafka.properties to point at sentry-site.xml
    */
   public static final String SENTRY_KAFKA_SITE_URL = "sentry.kafka.site.url";
-
   public static final String AUTHZ_SITE_FILE = "sentry-site.xml";
+  public static final String KAFKA_SUPER_USERS = "kafka.superusers";
+
   /**
    * Config setting definitions
    */

@@ -26,8 +26,10 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
 import org.apache.sentry.core.model.kafka.KafkaAuthorizable;
+import org.apache.sentry.core.model.kafka.Server;
 import org.apache.sentry.kafka.conf.KafkaAuthConf;
 import org.apache.sentry.provider.db.generic.SentryGenericProviderBackend;
 import org.apache.sentry.provider.db.generic.service.thrift.SentryGenericServiceClient;
@@ -60,25 +62,7 @@ public class AbstractKafkaSentryTestBase {
   protected static final String ADMIN_USER = "superuser";
   protected static final String ADMIN_GROUP = "group0";
   protected static final String ADMIN_ROLE  = "role0";
-  /** test users, groups and roles */
-  /*protected static final String USER1 = StaticUserGroupRole.USER_1;
-  protected static final String USER2 = StaticUserGroupRole.USER_2;
-  protected static final String USER3 = StaticUserGroupRole.USER_3;
-  protected static final String USER4 = StaticUserGroupRole.USER_4;
-  protected static final String USER5 = StaticUserGroupRole.USER_5;
 
-  protected static final String GROUP1 = StaticUserGroupRole.GROUP_1;
-  protected static final String GROUP2 = StaticUserGroupRole.GROUP_2;
-  protected static final String GROUP3 = StaticUserGroupRole.GROUP_3;
-  protected static final String GROUP4 = StaticUserGroupRole.GROUP_4;
-  protected static final String GROUP5 = StaticUserGroupRole.GROUP_5;
-
-  protected static final String ROLE1 = StaticUserGroupRole.ROLE_1;
-  protected static final String ROLE2 = StaticUserGroupRole.ROLE_2;
-  protected static final String ROLE3 = StaticUserGroupRole.ROLE_3;
-  protected static final String ROLE4 = StaticUserGroupRole.ROLE_4;
-  protected static final String ROLE5 = StaticUserGroupRole.ROLE_5;
-*/
   protected static SentryService server;
 
   protected static File baseDir;
@@ -166,8 +150,6 @@ public class AbstractKafkaSentryTestBase {
       policyFile.addGroupsToUser(user,
           groups.toArray(new String[groups.size()]));
     }
-    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
-    policyFile.addGroupsToUser(loginUser.getShortUserName(), loginUser.getGroupNames());
 
     policyFile.write(policyFilePath);
   }
@@ -176,13 +158,16 @@ public class AbstractKafkaSentryTestBase {
     SentryGenericServiceClient sentryClient = null;
     try {
       /** grant all privilege to admin user */
-      sentryClient = SentryGenericServiceClientFactory.create(getClientConfig());
+      sentryClient = getSentryClient();
       sentryClient.createRoleIfNotExist(ADMIN_USER, ADMIN_ROLE, COMPONENT);
       sentryClient.addRoleToGroups(ADMIN_USER, ADMIN_ROLE, COMPONENT, Sets.newHashSet(ADMIN_GROUP));
       final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-      authorizables.add(new TAuthorizable(KafkaAuthorizable.AuthorizableType.CLUSTER.name(), "cluster"));
+      Server server = new Server("127.0.0.1");
+      authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+      Cluster cluster = new Cluster("kafka-cluster");
+      authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
       sentryClient.grantPrivilege(ADMIN_USER, ADMIN_ROLE, COMPONENT,
-          new TSentryPrivilege(COMPONENT, "", authorizables,
+          new TSentryPrivilege(COMPONENT, "kafka", authorizables,
               KafkaActionConstant.ALL));
     } finally {
       if (sentryClient != null) {
@@ -191,8 +176,16 @@ public class AbstractKafkaSentryTestBase {
     }
   }
 
+  protected static SentryGenericServiceClient getSentryClient() throws Exception {
+    return SentryGenericServiceClientFactory.create(getClientConfig());
+  }
+
   public static void assertCausedMessage(Exception e, String message) {
-    assertTrue(e.getCause().getMessage().contains(message));
+    if (e.getCause() != null) {
+      assertTrue("Expected message: " + message + ", but got: " + e.getCause().getMessage(), e.getCause().getMessage().contains(message));
+    } else {
+      assertTrue("Expected message: " + message + ", but got: " + e.getMessage(), e.getMessage().contains(message));
+    }
   }
 
   private static Configuration getClientConfig() {

@@ -101,7 +101,7 @@ public class KafkaAuthBinding {
                 resourceName});
         if (providerBackend instanceof SentryGenericProviderBackend) {
             ((SentryGenericProviderBackend) providerBackend).setComponentType(COMPONENT_TYPE);
-            ((SentryGenericProviderBackend) providerBackend).setServiceName(instanceName);
+            ((SentryGenericProviderBackend) providerBackend).setServiceName("kafka" + instanceName);
         }
 
         // Instantiate the configured policyEngine

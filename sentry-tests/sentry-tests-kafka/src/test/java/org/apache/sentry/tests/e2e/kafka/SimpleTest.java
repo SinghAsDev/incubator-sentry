@@ -16,21 +16,34 @@
  */
 package org.apache.sentry.tests.e2e.kafka;
 
+import com.google.common.collect.Sets;
 import junit.framework.Assert;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.errors.TopicAuthorizationException;
+import org.apache.sentry.core.model.kafka.Cluster;
+import org.apache.sentry.core.model.kafka.ConsumerGroup;
+import org.apache.sentry.core.model.kafka.KafkaActionConstant;
+import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Topic;
+import org.apache.sentry.provider.db.generic.service.thrift.SentryGenericServiceClient;
+import org.apache.sentry.provider.db.generic.service.thrift.TAuthorizable;
+import org.apache.sentry.provider.db.generic.service.thrift.TSentryPrivilege;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -40,41 +53,187 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTest.class);
 
     @Test
-    public void testProduceConsumeForSuperuser() throws Exception {
-        testProduceAndConsume("test", "test");
+    public void testProduceConsumeForSuperuser() {
+        try {
+            testProduce("test");
+        } catch (Exception ex) {
+            Assert.fail("Superuser must have been allowed to perform all and any actions. \nException: \n" + ex);
+        }
     }
 
     @Test
     public void testProduceConsumeCycle() throws Exception {
         try {
-            testProduceAndConsume("user1", "user1");
+            testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
         } catch (ExecutionException ex) {
-
-            if (ex.getCause() instanceof TopicAuthorizationException) {
-                // Do nothing, as it is expected
-                LOGGER.info("user1 denied to describe topic t1. " + ex.getCause().getMessage());
-            } else {
-                throw ex;
-            }
+            assertCausedMessage(ex, "Not authorized to access topics: [t1]");
         }
 
-        policyFile.addPermissionsToRole("describe", "server=*")
-            .addRolesToGroup("group1", "describe")
-            .addGroupsToUser("user1", "group1");
-        //renewIniAndRestartKafka();
+        // Allow SERVER=127.0.0.1->Topic=t1->action=describe
+        SentryGenericServiceClient sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            sentryClient.addRoleToGroups(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT, Sets.newHashSet(StaticUserGroupRole.GROUP_1));
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            Topic topic = new Topic("t1");
+            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.DESCRIBE));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
+            }
+        }
 
         try {
-            testProduceAndConsume("user1", "user1");
+            testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
         } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicAuthorizationException) {
-                // Do nothing, as it is expected
-                LOGGER.info("user1 denied to create topic in cluster.");
-            } else {
-                throw ex;
+            assertCausedMessage(ex, "Not authorized to access topics: [t1]");
+        }
+
+        // Allow SERVER=127.0.0.1->Cluster=kafka-cluster->action=create
+        sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            Cluster cluster = new Cluster("kafka-cluster");
+            authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.CREATE));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
             }
         }
+
+        try {
+            testProduce("user1");
+            Assert.fail("user1 must not have been authorized to describe topic t1.");
+        } catch (ExecutionException ex) {
+            assertCausedMessage(ex, "Not authorized to access topics: [t1]");
+        }
+
+        // Allow SERVER=127.0.0.1->Topic=t1->action=write
+        sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            Topic topic = new Topic("t1");
+            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.WRITE));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
+            }
+        }
+
+        try{
+            testProduce("user1");
+        } catch (Exception ex) {
+            Assert.fail("user1 should have been able to successfully produce to topic t1. \n Exception: " + ex);
+        }
+
+        // START TESTING CONSUMER
+        try {
+            testConsume("user1");
+            Assert.fail("user1 must not have been authorized to describe consumer group SentryKafkaConsumer.");
+        } catch (Exception ex) {
+            assertCausedMessage(ex, "Not authorized to access group: SentryKafkaConsumer");
+        }
+
+        // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=describe
+        sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
+            authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.DESCRIBE));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
+            }
+        }
+
+        try {
+            testConsume("user1");
+            Assert.fail("user1 must not have been authorized to read consumer group SentryKafkaConsumer.");
+        } catch (Exception ex) {
+            assertCausedMessage(ex, "Not authorized to access group: SentryKafkaConsumer");
+        }
+
+        // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=read
+        sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
+            authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.READ));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
+            }
+        }
+
+        try {
+            testConsume("user1");
+            Assert.fail("user1 must not have been authorized to read from topic t1.");
+        } catch (Exception ex) {
+            assertCausedMessage(ex, "Not authorized to access topics: [t1]");
+        }
+
+        // SERVER=127.0.0.1->Topic=t1->action=read
+        sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
+            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+            Server server = new Server("127.0.0.1");
+            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+            Topic topic = new Topic("t1");
+            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+
+            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
+                    KafkaActionConstant.READ));
+        } finally {
+            if (sentryClient != null) {
+                sentryClient.close();
+                sentryClient = null;
+            }
+        }
+
+        testConsume("user1");
     }
 
     @Test
@@ -94,7 +253,7 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
     @Test
     public void testClusterResouceActionCreateFailure() throws Exception {
         try {
-            testProduceAndConsume("user1", "user1");
+            testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
         } catch (ExecutionException ex) {
             if (ex.getCause() instanceof TopicAuthorizationException) {
@@ -107,7 +266,7 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
 
 
         try {
-            testProduceAndConsume("user2", "user2");
+            testProduce("user2");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
         } catch (ExecutionException ex) {
             if (ex.getCause() instanceof TopicAuthorizationException) {
@@ -176,7 +335,7 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
     @Test
     public void testTopicResourceActionDescribeFailure() throws Exception {
         try {
-            testProduceAndConsume("user1", "user1");
+            testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
         } catch (ExecutionException ex) {
             if (ex.getCause() instanceof TopicAuthorizationException) {
@@ -190,7 +349,7 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
 
     @Test
     public void testGroupResourceActionDescribeSuccess() throws Exception {
-        testProduceAndConsume("user2", "user2");
+        testProduce("user2");
     }
 
     @Test
@@ -208,39 +367,42 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
 
     }
 
-    private void testProduceAndConsume(String producerUser, String consumerUser) throws Exception {
+    private void testProduce(String producerUser) throws Exception {
         final KafkaProducer<String, String> kafkaProducer = createKafkaProducer(producerUser);
         try {
-            final KafkaConsumer<String, String> kafkaConsumer = createKafkaConsumer(consumerUser);
-            try {
-
-                final String topic = "t1";
-                final String msg = "message1";
-                ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, msg);
-                kafkaProducer.send(producerRecord).get();
-                LOGGER.debug("Sent message: " + producerRecord);
-
-                kafkaConsumer.subscribe(Collections.singletonList(topic));
-                waitTillTrue("Did not receive expected message.", 60, 2, new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        ConsumerRecords<String, String> records = kafkaConsumer.poll(1000);
-                        if (records.isEmpty())
-                            LOGGER.debug("No record received from consumer.");
-                        for (ConsumerRecord<String, String> record : records) {
-                            if (record.value().equals(msg)) {
-                                return true;
-                            }
-                            LOGGER.debug("Received message: " + record);
-                        }
-                        return false;
-                    }
-                });
-            } finally {
-                kafkaConsumer.close();
-            }
+            final String topic = "t1";
+            final String msg = "message1";
+            ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, msg);
+            kafkaProducer.send(producerRecord).get();
+            LOGGER.debug("Sent message: " + producerRecord);
         } finally {
             kafkaProducer.close();
+        }
+    }
+
+    private void testConsume(String consumerUser) throws Exception {
+        final KafkaConsumer<String, String> kafkaConsumer = createKafkaConsumer(consumerUser);
+        try {
+            final String topic = "t1";
+            final String msg = "message1";
+            kafkaConsumer.subscribe(Collections.singletonList(topic), new CustomRebalanceListener(kafkaConsumer));
+            waitTillTrue("Did not receive expected message.", 60, 2, new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    ConsumerRecords<String, String> records = kafkaConsumer.poll(1000);
+                    if (records.isEmpty())
+                        LOGGER.debug("No record received from consumer.");
+                    for (ConsumerRecord<String, String> record : records) {
+                        if (record.value().equals(msg)) {
+                            LOGGER.debug("Received message: " + record);
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            });
+        } finally {
+            kafkaConsumer.close();
         }
     }
 
@@ -302,5 +464,26 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         Assert.fail(failureMessage);
+    }
+
+    class CustomRebalanceListener implements ConsumerRebalanceListener {
+
+        KafkaConsumer consumer = null;
+
+        CustomRebalanceListener(KafkaConsumer kafkaConsumer) {
+            consumer = kafkaConsumer;
+        }
+
+        @Override
+        public void onPartitionsRevoked(Collection<TopicPartition> collection) {
+
+        }
+
+        @Override
+        public void onPartitionsAssigned(Collection<TopicPartition> collection) {
+            for (TopicPartition tp: collection) {
+                consumer.seekToBeginning(tp);
+            }
+        }
     }
 }
