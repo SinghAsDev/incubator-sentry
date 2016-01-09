@@ -18,6 +18,7 @@ package org.apache.sentry.tests.e2e.kafka;
 
 import com.google.common.collect.Sets;
 import junit.framework.Assert;
+import kafka.admin.AdminUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -56,6 +57,7 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
     public void testProduceConsumeForSuperuser() {
         try {
             testProduce("test");
+            testConsume("test");
         } catch (Exception ex) {
             Assert.fail("Superuser must have been allowed to perform all and any actions. \nException: \n" + ex);
         }
@@ -70,27 +72,16 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access topics: [t1]");
         }
 
+        final String role = StaticUserGroupRole.ROLE_1;
+        final String group = StaticUserGroupRole.GROUP_1;
+
         // Allow SERVER=127.0.0.1->Topic=t1->action=describe
-        SentryGenericServiceClient sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            sentryClient.addRoleToGroups(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT, Sets.newHashSet(StaticUserGroupRole.GROUP_1));
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            Topic topic = new Topic("t1");
-            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
-
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
-                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.DESCRIBE));
-        } finally {
-            if (sentryClient != null) {
-                sentryClient.close();
-                sentryClient = null;
-            }
-        }
-
+        ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
+        Server server = new Server("127.0.0.1");
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        Topic topic = new Topic("t1");
+        authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+        addPermissions(role, group, KafkaActionConstant.DESCRIBE, authorizables);
         try {
             testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
@@ -99,25 +90,11 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         // Allow SERVER=127.0.0.1->Cluster=kafka-cluster->action=create
-        sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            Cluster cluster = new Cluster("kafka-cluster");
-            authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
-
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
-                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.CREATE));
-        } finally {
-            if (sentryClient != null) {
-                sentryClient.close();
-                sentryClient = null;
-            }
-        }
-
+        authorizables = new ArrayList<TAuthorizable>();
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        Cluster cluster = new Cluster("kafka-cluster");
+        authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
+        addPermissions(role, group, KafkaActionConstant.CREATE, authorizables);
         try {
             testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
@@ -126,25 +103,10 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         // Allow SERVER=127.0.0.1->Topic=t1->action=write
-        sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            Topic topic = new Topic("t1");
-            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
-
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
-                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.WRITE));
-        } finally {
-            if (sentryClient != null) {
-                sentryClient.close();
-                sentryClient = null;
-            }
-        }
-
+        authorizables = new ArrayList<TAuthorizable>();
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+        addPermissions(role, group, KafkaActionConstant.WRITE, authorizables);
         try{
             testProduce("user1");
         } catch (Exception ex) {
@@ -160,25 +122,11 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=describe
-        sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
-            authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
-
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
-                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.DESCRIBE));
-        } finally {
-            if (sentryClient != null) {
-                sentryClient.close();
-                sentryClient = null;
-            }
-        }
-
+        authorizables = new ArrayList<TAuthorizable>();
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
+        authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
+        addPermissions(role, group, KafkaActionConstant.DESCRIBE, authorizables);
         try {
             testConsume("user1");
             Assert.fail("user1 must not have been authorized to read consumer group SentryKafkaConsumer.");
@@ -187,25 +135,10 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=read
-        sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
-            authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
-
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
-                new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.READ));
-        } finally {
-            if (sentryClient != null) {
-                sentryClient.close();
-                sentryClient = null;
-            }
-        }
-
+        authorizables = new ArrayList<TAuthorizable>();
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
+        addPermissions(role, group, KafkaActionConstant.READ, authorizables);
         try {
             testConsume("user1");
             Assert.fail("user1 must not have been authorized to read from topic t1.");
@@ -214,26 +147,28 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
         }
 
         // SERVER=127.0.0.1->Topic=t1->action=read
-        sentryClient = getSentryClient();
-        try {
-            sentryClient.createRoleIfNotExist(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT);
-            final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-            Server server = new Server("127.0.0.1");
-            authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
-            Topic topic = new Topic("t1");
-            authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+        authorizables = new ArrayList<TAuthorizable>();
+        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
+        addPermissions(role, group, KafkaActionConstant.READ, authorizables);
+        testConsume("user1");
+    }
 
-            sentryClient.grantPrivilege(ADMIN_USER, StaticUserGroupRole.ROLE_1, COMPONENT,
+    private void addPermissions(String role, String group, String action, ArrayList<TAuthorizable> authorizables) throws Exception {
+        SentryGenericServiceClient sentryClient = getSentryClient();
+        try {
+            sentryClient.createRoleIfNotExist(ADMIN_USER, role, COMPONENT);
+            sentryClient.addRoleToGroups(ADMIN_USER, role, COMPONENT, Sets.newHashSet(group));
+
+            sentryClient.grantPrivilege(ADMIN_USER, role, COMPONENT,
                 new TSentryPrivilege(COMPONENT, "kafka", authorizables,
-                    KafkaActionConstant.READ));
+                    action));
         } finally {
             if (sentryClient != null) {
                 sentryClient.close();
                 sentryClient = null;
             }
         }
-
-        testConsume("user1");
     }
 
     @Test
