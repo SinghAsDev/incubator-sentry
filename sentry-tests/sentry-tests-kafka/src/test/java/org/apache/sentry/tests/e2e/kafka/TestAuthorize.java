@@ -18,7 +18,6 @@ package org.apache.sentry.tests.e2e.kafka;
 
 import com.google.common.collect.Sets;
 import junit.framework.Assert;
-import kafka.admin.AdminUtils;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -30,7 +29,6 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.config.SslConfigs;
-import org.apache.kafka.common.errors.TopicAuthorizationException;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
@@ -50,8 +48,8 @@ import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
-public class SimpleTest extends AbstractKafkaSentryTestBase {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleTest.class);
+public class TestAuthorize extends AbstractKafkaSentryTestBase {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TestAuthorize.class);
 
     @Test
     public void testProduceConsumeForSuperuser() {
@@ -59,12 +57,14 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
             testProduce("test");
             testConsume("test");
         } catch (Exception ex) {
-            Assert.fail("Superuser must have been allowed to perform all and any actions. \nException: \n" + ex);
+            Assert.fail("Superuser must have been allowed to perform any and all actions. \nException: \n" + ex);
         }
     }
 
     @Test
     public void testProduceConsumeCycle() throws Exception {
+
+        // START TESTING PRODUCER
         try {
             testProduce("user1");
             Assert.fail("user1 must not have been authorized to describe topic t1.");
@@ -169,137 +169,6 @@ public class SimpleTest extends AbstractKafkaSentryTestBase {
                 sentryClient = null;
             }
         }
-    }
-
-    @Test
-    public void testClusterResouceActionCreateSuccess() throws Exception {
-    }
-
-    @Test
-    public void testClusterResouceActionDescribeSuccess() {
-
-    }
-
-    @Test
-    public void testClusterResouceActionClusterActionSuccess() {
-
-    }
-
-    @Test
-    public void testClusterResouceActionCreateFailure() throws Exception {
-        try {
-            testProduce("user1");
-            Assert.fail("user1 must not have been authorized to describe topic t1.");
-        } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicAuthorizationException) {
-                // Do nothing, as it is expected
-                LOGGER.info("user1 denied to describe topic t1.");
-            } else {
-                throw ex;
-            }
-        }
-
-
-        try {
-            testProduce("user2");
-            Assert.fail("user1 must not have been authorized to describe topic t1.");
-        } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicAuthorizationException) {
-                // Do nothing, as it is expected
-                LOGGER.info("user1 denied to create topic in cluster.");
-            } else {
-                throw ex;
-            }
-        }
-    }
-
-    @Test
-    public void testClusterResouceActionDescribeFailure() {
-
-    }
-
-    @Test
-    public void testClusterResouceActionClusterActionFailure() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionReadSuccess() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionWriteSuccess() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionDeleteSuccess() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionAlterSuccess() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionDescribeSuccess() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionReadFailure() throws Exception {
-    }
-
-    @Test
-    public void testTopicResourceActionWriteFailure() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionDeleteFailure() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionAlterFailure() {
-
-    }
-
-    @Test
-    public void testTopicResourceActionDescribeFailure() throws Exception {
-        try {
-            testProduce("user1");
-            Assert.fail("user1 must not have been authorized to describe topic t1.");
-        } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof TopicAuthorizationException) {
-                // Do nothing, as it is expected
-                LOGGER.info("user1 denied to describe topic t1.");
-            } else {
-                throw ex;
-            }
-        }
-    }
-
-    @Test
-    public void testGroupResourceActionDescribeSuccess() throws Exception {
-        testProduce("user2");
-    }
-
-    @Test
-    public void testGroupResourceActionDescribeFailure() {
-
-    }
-
-    @Test
-    public void testGroupResourceActionReadSuccess() {
-
-    }
-
-    @Test
-    public void testGroupResourceActionReadFailure() {
-
     }
 
     private void testProduce(String producerUser) throws Exception {

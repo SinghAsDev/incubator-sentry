@@ -28,13 +28,14 @@ import com.google.common.base.Strings;
 public class KafkaAuthBindingSingleton {
   private static Logger log = LoggerFactory.getLogger(KafkaAuthBindingSingleton.class);
   private static KafkaAuthBindingSingleton instance = null;
+  private static KafkaAuthConf kafkaAuthConf = null;
 
   private KafkaAuthBinding binding;
 
   private KafkaAuthBindingSingleton(String sentry_site) {
     try {
-      KafkaAuthConf conf = loadAuthzConf(sentry_site);
-      binding = new KafkaAuthBinding(conf);
+      kafkaAuthConf = loadAuthzConf(sentry_site);
+      binding = new KafkaAuthBinding(kafkaAuthConf);
       log.info("KafkaAuthBinding created successfully");
     } catch (Exception ex) {
       log.error("Unable to create KafkaAuthBinding", ex);
@@ -71,5 +72,9 @@ public class KafkaAuthBindingSingleton {
 
   public KafkaAuthBinding getAuthBinding() {
     return binding;
+  }
+
+  public KafkaAuthConf getKafkaAuthConf() {
+    return kafkaAuthConf;
   }
 }

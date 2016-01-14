@@ -28,7 +28,6 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
-import org.apache.sentry.core.model.kafka.KafkaAuthorizable;
 import org.apache.sentry.core.model.kafka.Server;
 import org.apache.sentry.kafka.conf.KafkaAuthConf;
 import org.apache.sentry.provider.db.generic.SentryGenericProviderBackend;
@@ -63,7 +62,8 @@ public class AbstractKafkaSentryTestBase {
   protected static final String ADMIN_GROUP = "group0";
   protected static final String ADMIN_ROLE  = "role0";
 
-  protected static SentryService server;
+  protected static SentryService sentryServer;
+  protected static File sentrySitePath;
 
   protected static File baseDir;
   protected static File dbDir;
@@ -72,12 +72,12 @@ public class AbstractKafkaSentryTestBase {
   protected static PolicyFile policyFile;
 
   protected static String bootstrapServers = null;
-  protected static KafkaTestServer kafkaTestServer = null;
+  protected static KafkaTestServer kafkaServer = null;
 
   @BeforeClass
   public static void beforeTestEndToEnd() throws Exception {
     setupConf();
-    startSentryService();
+    startSentryServer();
     setUserGroups();
     setAdminPrivilege();
     startKafkaServer();
@@ -85,14 +85,21 @@ public class AbstractKafkaSentryTestBase {
 
   @AfterClass
   public static void afterTestEndToEnd() throws Exception {
-    if (server != null) {
-      server.stop();
-      server = null;
-    }
+    stopSentryServer();
+    stopKafkaServer();
+  }
 
-    if (kafkaTestServer != null) {
-      kafkaTestServer.shutdown();
-      kafkaTestServer = null;
+  private static void stopKafkaServer() {
+    if (kafkaServer != null) {
+      kafkaServer.shutdown();
+      kafkaServer = null;
+    }
+  }
+
+  private static void stopSentryServer() throws Exception {
+    if (sentryServer != null) {
+      sentryServer.stop();
+      sentryServer = null;
     }
 
     FileUtils.deleteDirectory(baseDir);
@@ -100,6 +107,7 @@ public class AbstractKafkaSentryTestBase {
 
   public static void setupConf() throws Exception {
     baseDir = createTempDir();
+    sentrySitePath = new File(baseDir, "sentry-site.xml");
     dbDir = new File(baseDir, "sentry_policy_db");
     policyFilePath = new File(baseDir, "local_policy_file.ini");
     policyFile = new PolicyFile();
@@ -120,7 +128,7 @@ public class AbstractKafkaSentryTestBase {
         ServerConfig.SENTRY_STORE_LOCAL_GROUP_MAPPING);
     conf.set(ServerConfig.SENTRY_STORE_GROUP_MAPPING_RESOURCE,
         policyFilePath.getPath());
-    server = new SentryServiceFactory().create(conf);
+    sentryServer = new SentryServiceFactory().create(conf);
   }
 
   public static File createTempDir() {
@@ -133,10 +141,10 @@ public class AbstractKafkaSentryTestBase {
     throw new IllegalStateException("Failed to create temp directory");
   }
 
-  public static void startSentryService() throws Exception {
-    server.start();
+  public static void startSentryServer() throws Exception {
+    sentryServer.start();
     final long start = System.currentTimeMillis();
-    while(!server.isRunning()) {
+    while(!sentryServer.isRunning()) {
       Thread.sleep(1000);
       if(System.currentTimeMillis() - start > 60000L) {
         throw new TimeoutException("Server did not start after 60 seconds");
@@ -150,6 +158,8 @@ public class AbstractKafkaSentryTestBase {
       policyFile.addGroupsToUser(user,
           groups.toArray(new String[groups.size()]));
     }
+    UserGroupInformation loginUser = UserGroupInformation.getLoginUser();
+    policyFile.addGroupsToUser(loginUser.getShortUserName(), loginUser.getGroupNames());
 
     policyFile.write(policyFilePath);
   }
@@ -192,8 +202,8 @@ public class AbstractKafkaSentryTestBase {
     Configuration conf = new Configuration();
     /** set the Sentry client configuration for Kafka Service integration */
     conf.set(ServerConfig.SECURITY_MODE, ServerConfig.SECURITY_MODE_NONE);
-    conf.set(ClientConfig.SERVER_RPC_ADDRESS, server.getAddress().getHostName());
-    conf.set(ClientConfig.SERVER_RPC_PORT, String.valueOf(server.getAddress().getPort()));
+    conf.set(ClientConfig.SERVER_RPC_ADDRESS, sentryServer.getAddress().getHostName());
+    conf.set(ClientConfig.SERVER_RPC_PORT, String.valueOf(sentryServer.getAddress().getPort()));
 
     conf.set(KafkaAuthConf.AuthzConfVars.AUTHZ_PROVIDER.getVar(),
         LocalGroupResourceAuthorizationProvider.class.getName());
@@ -206,11 +216,10 @@ public class AbstractKafkaSentryTestBase {
   private static void startKafkaServer() throws Exception {
     // Workaround for SentryKafkaAuthorizer to be added to classpath
     Class.forName("org.apache.sentry.kafka.authorizer.SentryKafkaAuthorizer");
-    File sentrySitePath = new File(baseDir, "sentry-site.xml");
     getClientConfig().writeXml(new FileOutputStream(sentrySitePath));
 
-    kafkaTestServer = new KafkaTestServer(sentrySitePath);
-    kafkaTestServer.start();
-    bootstrapServers = kafkaTestServer.getBootstrapServers();
+    kafkaServer = new KafkaTestServer(sentrySitePath);
+    kafkaServer.start();
+    bootstrapServers = kafkaServer.getBootstrapServers();
   }
 }
