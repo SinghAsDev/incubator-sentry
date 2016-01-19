@@ -132,17 +132,20 @@ public class KafkaAuthBinding {
     private String getName(RequestChannel.Session session) {
         final String principalName = session.principal().getName();
         int start = principalName.indexOf("CN=");
-        String tmpName, name = "";
         if (start >= 0) {
-            tmpName = principalName.substring(start + 3);
-            int end = tmpName.indexOf(",");
-            if (end > 0) {
-                name = tmpName.substring(0, end);
-            } else {
-                name = tmpName;
+            String tmpName, name = "";
+            if (start >= 0) {
+                tmpName = principalName.substring(start + 3);
+                int end = tmpName.indexOf(",");
+                if (end > 0) {
+                    name = tmpName.substring(0, end);
+                } else {
+                    name = tmpName;
+                }
             }
+            return name;
+        } else {
+            return principalName;
         }
-        return name;
     }
-
 }

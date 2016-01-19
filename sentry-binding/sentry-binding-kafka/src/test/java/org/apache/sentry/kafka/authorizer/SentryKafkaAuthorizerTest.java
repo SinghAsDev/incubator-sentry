@@ -16,88 +16,114 @@
  */
 package org.apache.sentry.kafka.authorizer;
 
+import kafka.network.RequestChannel;
+import kafka.security.auth.Operation;
+import kafka.security.auth.Operation$;
+import kafka.security.auth.Resource;
+import kafka.security.auth.Resource$;
+import kafka.security.auth.ResourceType$;
+import kafka.server.KafkaConfig;
+import org.apache.kafka.common.security.auth.KafkaPrincipal;
+import org.apache.sentry.kafka.conf.KafkaAuthConf;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Properties;
+
 public class SentryKafkaAuthorizerTest {
-    /*
-      var authorizer = new SentryKafkaAuthorizer
-  val testHostName1 = InetAddress.getByName("server1")
-  val testHostName2 = InetAddress.getByName("server2")
-  val resourceName: String = Resource.ClusterResourceName
-  val clusterResource: Resource = new Resource(Cluster, resourceName)
-  val topic1Resource: Resource = new Resource(Topic, "t1");
-  val topic2Resource: Resource = new Resource(Topic, "t2");
-  var config: KafkaConfig = null
+
+  private SentryKafkaAuthorizer authorizer;
+  private InetAddress testHostName1;
+  private InetAddress testHostName2;
+  private String resourceName;
+  private Resource clusterResource;
+  private Resource topic1Resource;
+  private Resource topic2Resource;
+  private KafkaConfig config;
+
+  public SentryKafkaAuthorizerTest() throws UnknownHostException {
+    authorizer = new SentryKafkaAuthorizer();
+    testHostName1 = InetAddress.getByAddress("host1", new byte[] {12,12, 32, 1});
+    testHostName2 = InetAddress.getByAddress("host2", new byte[] {12,12, 32, 4});
+    //testHostName2 = InetAddress.getByName("host2");
+    resourceName = Resource$.MODULE$.ClusterResourceName();
+    clusterResource = new Resource(ResourceType$.MODULE$.fromString("cluster"), resourceName);
+    topic1Resource = new Resource(ResourceType$.MODULE$.fromString("topic"), "t1");
+    topic2Resource = new Resource(ResourceType$.MODULE$.fromString("topic"), "t2");
+  }
 
   @Before
-  def setUp() {
-    val props = new Properties
-    val sentry_site_path = classOf[SentryKafkaAuthorizerTest].getClassLoader.getResource(KafkaAuthConf.AUTHZ_SITE_FILE).getPath
+  public void  setUp() {
+    Properties props = new Properties();
+    String sentry_site_path = SentryKafkaAuthorizerTest.class.getClassLoader().getResource(KafkaAuthConf.AUTHZ_SITE_FILE).getPath();
     // Kafka check this prop when creating a config instance
-    props.put("zookeeper.connect", "test")
-    props.put("sentry.kafka.site.url", "file://" + sentry_site_path)
+    props.put("zookeeper.connect", "test");
+    props.put("sentry.kafka.site.url", "file://" + sentry_site_path);
 
-    config = KafkaConfig.fromProps(props)
-    authorizer.configure(config.originals)
+    config = KafkaConfig.fromProps(props);
+    authorizer.configure(config.originals());
   }
 
   @Test
-  def testAdmin() {
+  public void testAdmin() {
 
-    val admin = new KafkaPrincipal(KafkaPrincipal.USER_TYPE, "admin")
-    val host1Session = new Session(admin, testHostName1)
-    val host2Session = new Session(admin, testHostName2)
+    KafkaPrincipal admin = new KafkaPrincipal(KafkaPrincipal.USER_TYPE, "admin");
+    RequestChannel.Session host1Session = new RequestChannel.Session(admin, testHostName1);
+    RequestChannel.Session host2Session = new RequestChannel.Session(admin, testHostName2);
 
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Create,clusterResource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Describe,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host1Session,ClusterAction,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Read,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Write,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Create,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Delete,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Alter,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Describe,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,ClusterAction,topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Create"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Describe"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("ClusterAction"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Read"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Write"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Create"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Delete"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Alter"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Describe"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("ClusterAction"),topic1Resource));
 
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Create,clusterResource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Describe,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host2Session,ClusterAction,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Read,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Write,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Create,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Delete,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Alter,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,Describe,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host2Session,ClusterAction,topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Create"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Describe"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("ClusterAction"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Read"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Write"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Create"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Delete"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Alter"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Describe"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("ClusterAction"), topic1Resource));
   }
 
   @Test
-  def testSubAdmin() {
+  public void testSubAdmin() {
+    KafkaPrincipal admin = new KafkaPrincipal(KafkaPrincipal.USER_TYPE, "subadmin");
+    RequestChannel.Session host1Session = new RequestChannel.Session(admin, testHostName1);
+    RequestChannel.Session host2Session = new RequestChannel.Session(admin, testHostName2);
 
-    val admin = new KafkaPrincipal(KafkaPrincipal.USER_TYPE, "subadmin")
-    val host1Session = new Session(admin, testHostName1)
-    val host2Session = new Session(admin, testHostName2)
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Create"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Describe"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("ClusterAction"), clusterResource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Read"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Write"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Create"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Delete"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Alter"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("Describe"), topic1Resource));
+    Assert.assertTrue("Test failed.", authorizer.authorize(host1Session, Operation$.MODULE$.fromString("ClusterAction"),topic1Resource));
 
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Create,clusterResource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Describe,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host1Session,ClusterAction,clusterResource))
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Read,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Write,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Create,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Delete,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Alter,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,Describe,topic1Resource));
-    assertTrue("Test failed.", authorizer.authorize(host1Session,ClusterAction,topic1Resource));
-
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Create,clusterResource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Describe,clusterResource))
-    assertFalse("Test failed.", authorizer.authorize(host2Session,ClusterAction,clusterResource))
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Read,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Write,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Create,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Delete,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Alter,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,Describe,topic1Resource));
-    assertFalse("Test failed.", authorizer.authorize(host2Session,ClusterAction,topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Create"), clusterResource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Describe"), clusterResource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("ClusterAction"), clusterResource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Read"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Write"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Create"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Delete"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Alter"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("Describe"), topic1Resource));
+    Assert.assertFalse("Test failed.", authorizer.authorize(host2Session, Operation$.MODULE$.fromString("ClusterAction"), topic1Resource));
 
   }
-     */
 }

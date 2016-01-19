@@ -257,9 +257,11 @@ public class SentryKafkaAuthorizer implements Authorizer {
   }
 
   private boolean isSuperUser(KafkaPrincipal user) {
-    for (KafkaPrincipal superUser : super_users) {
-      if (superUser.equals(user)) {
-        return true;
+    if (super_users != null) {
+      for (KafkaPrincipal superUser : super_users) {
+        if (superUser.equals(user)) {
+          return true;
+        }
       }
     }
     return false;
