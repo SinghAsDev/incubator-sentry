@@ -129,12 +129,15 @@ public class KafkaAuthBinding {
         return authProvider.hasAccess(new Subject(getName(session)), authorizables, actions, ActiveRoleSet.ALL);
     }
 
+    /*
+    * For SSL session's Kafka creates user names with "CN=" prepended to the user name.
+    * "=" is used as splitter by Sentry to parse key value pairs and so it is required to strip off "CN=".
+    * */
     private String getName(RequestChannel.Session session) {
         final String principalName = session.principal().getName();
         int start = principalName.indexOf("CN=");
         if (start >= 0) {
             String tmpName, name = "";
-            if (start >= 0) {
                 tmpName = principalName.substring(start + 3);
                 int end = tmpName.indexOf(",");
                 if (end > 0) {
@@ -142,7 +145,6 @@ public class KafkaAuthBinding {
                 } else {
                     name = tmpName;
                 }
-            }
             return name;
         } else {
             return principalName;
