@@ -16,63 +16,70 @@
  */
 package org.apache.sentry.kafka.authorizer;
 
+import junit.framework.Assert;
+import kafka.security.auth.Resource;
+import kafka.security.auth.Resource$;
+import kafka.security.auth.ResourceType$;
+import org.apache.sentry.core.common.Authorizable;
+import org.apache.sentry.core.model.kafka.KafkaAuthorizable;
+import org.apache.sentry.kafka.ConvertUtil;
+import org.junit.Test;
+
+import java.util.List;
+
 public class ConvertUtilTest {
-    /*
-      @Test
-  def testCluster {
-    val hostname: String = "localhost"
-    val clusterName: String = Resource.ClusterResourceName
-    val clusterResource: Resource = new Resource(Cluster, clusterName)
-    val authorizables: util.List[Authorizable] = ConvertUtil.convertResourceToAuthorizable(hostname, clusterResource)
-    import scala.collection.JavaConversions._
-    for (auth <- authorizables) {
-      if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.CLUSTER.name)) {
-        assertEquals(auth.getName, clusterName)
-      } else if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.SERVER.name)) {
-        assertEquals(auth.getName, hostname)
+
+  @Test
+  public void testCluster() {
+    String hostname = "localhost";
+    String clusterName = Resource$.MODULE$.ClusterResourceName();
+    Resource clusterResource = new Resource(ResourceType$.MODULE$.fromString("cluster"), clusterName);
+    List<Authorizable> authorizables = ConvertUtil.convertResourceToAuthorizable(hostname, clusterResource);
+    for (Authorizable auth : authorizables) {
+      if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.CLUSTER.name())) {
+        Assert.assertEquals(auth.getName(), clusterName);
+      } else if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.HOST.name())) {
+        Assert.assertEquals(auth.getName(), hostname);
       } else {
-        fail("Type is unexpect:" + auth.getTypeName)
+        Assert.fail("Unexpected type found: " + auth.getTypeName());
       }
     }
-    assertEquals(authorizables.size, 2)
+    Assert.assertEquals(authorizables.size(), 2);
   }
 
   @Test
-  def testTopic {
-    val hostname: String = "localhost"
-    val topicName: String = "t1"
-    val topicResource: Resource = new Resource(Topic, topicName)
-    val authorizables: util.List[Authorizable] = ConvertUtil.convertResourceToAuthorizable(hostname, topicResource)
-    import scala.collection.JavaConversions._
-    for (auth <- authorizables) {
-      if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.TOPIC.name)) {
-        assertEquals(auth.getName,topicName)
-      } else if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.SERVER.name)) {
-        assertEquals(auth.getName,hostname)
+  public void testTopic() {
+    String hostname = "localhost";
+    String topicName = "t1";
+    Resource topicResource = new Resource(ResourceType$.MODULE$.fromString("topic"), topicName);
+    List<Authorizable> authorizables = ConvertUtil.convertResourceToAuthorizable(hostname, topicResource);
+    for (Authorizable auth : authorizables) {
+      if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.TOPIC.name())) {
+        Assert.assertEquals(auth.getName(), topicName);
+      } else if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.HOST.name())) {
+        Assert.assertEquals(auth.getName(), hostname);
       } else {
-        fail("Type is unexpect:" + auth.getTypeName)
+        Assert.fail("Unexpected type found: " + auth.getTypeName());
       }
     }
-    assertEquals(authorizables.size, 2)
+    Assert.assertEquals(authorizables.size(), 2);
   }
 
   @Test
-  def testConsumerGroup {
-    val hostname: String = "localhost"
-    val consumerGroup: String = "g1"
-    val consumerGroupResource: Resource = new Resource(Group, consumerGroup)
-    val authorizables: util.List[Authorizable] = ConvertUtil.convertResourceToAuthorizable(hostname, consumerGroupResource)
-    import scala.collection.JavaConversions._
-    for (auth <- authorizables) {
-      if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.CONSUMERGROUP.name)) {
-        assertEquals(auth.getName,consumerGroup)
-      } else if (auth.getTypeName.equalsIgnoreCase(AuthorizableType.SERVER.name)) {
-        assertEquals(auth.getName,hostname)
+  public void testConsumerGroup() {
+    String hostname = "localhost";
+    String consumerGroup = "g1";
+    Resource consumerGroupResource = new Resource(ResourceType$.MODULE$.fromString("group"), consumerGroup);
+    List<Authorizable> authorizables = ConvertUtil.convertResourceToAuthorizable(hostname, consumerGroupResource);
+    for (Authorizable auth : authorizables) {
+      if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.GROUP.name())) {
+        Assert.assertEquals(auth.getName(),consumerGroup);
+      } else if (auth.getTypeName().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.HOST.name())) {
+        Assert.assertEquals(auth.getName(),hostname);
       } else {
-        fail("Type is unexpect:" + auth.getTypeName)
+        Assert.fail("Unexpected type found: " + auth.getTypeName());
       }
     }
-    assertEquals(authorizables.size, 2)
+    Assert.assertEquals(authorizables.size(), 2);
   }
-     */
 }
