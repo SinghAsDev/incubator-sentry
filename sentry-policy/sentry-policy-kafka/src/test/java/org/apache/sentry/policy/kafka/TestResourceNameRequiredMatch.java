@@ -21,7 +21,6 @@ package org.apache.sentry.policy.kafka;
 import junit.framework.Assert;
 
 import org.apache.sentry.policy.common.PrivilegeValidatorContext;
-import org.apache.sentry.policy.kafka.ResourceRequiredMatch;
 import org.apache.shiro.config.ConfigurationException;
 import org.junit.Test;
 
@@ -69,7 +68,7 @@ public class TestResourceNameRequiredMatch {
       Assert.fail("Not expected ConfigurationException");
     }
     try {
-      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1->consumer_group=g1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1->group=g1->action=read"));
     } catch (ConfigurationException ex) {
       Assert.fail("Not expected ConfigurationException");
     }

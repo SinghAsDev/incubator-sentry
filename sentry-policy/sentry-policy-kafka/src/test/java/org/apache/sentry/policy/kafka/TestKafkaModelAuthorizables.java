@@ -28,8 +28,8 @@ public class TestKafkaModelAuthorizables {
 
   @Test
   public void testHost() throws Exception {
-    Host host1 = (Host)KafkaModelAuthorizables.from("SERVER=server1");
-    assertEquals("server1", host1.getName());
+    Host host1 = (Host)KafkaModelAuthorizables.from("HOST=host1");
+    assertEquals("host1", host1.getName());
   }
 
   @Test(expected=IllegalArgumentException.class)
@@ -39,12 +39,12 @@ public class TestKafkaModelAuthorizables {
 
   @Test(expected=IllegalArgumentException.class)
   public void testEmptyKey() throws Exception {
-    System.out.println(KafkaModelAuthorizables.from("=server1"));
+    System.out.println(KafkaModelAuthorizables.from("=host1"));
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testEmptyValue() throws Exception {
-    System.out.println(KafkaModelAuthorizables.from("SERVER="));
+    System.out.println(KafkaModelAuthorizables.from("HOST="));
   }
 
   @Test

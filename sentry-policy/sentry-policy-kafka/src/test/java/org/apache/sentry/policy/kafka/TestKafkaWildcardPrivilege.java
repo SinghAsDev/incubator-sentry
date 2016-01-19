@@ -51,12 +51,12 @@ public class TestKafkaWildcardPrivilege {
   private static final Privilege KAFKA_HOST1_CLUSTER1_WRITE =
       create(new KeyValue("HOST", "host1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
-  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_ALL =
-      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.ALL));
-  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_READ =
-      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.READ));
-  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_WRITE =
-      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.WRITE));
+  private static final Privilege KAFKA_HOST1_GROUP1_ALL =
+      create(new KeyValue("HOST", "host1"), new KeyValue("GROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.ALL));
+  private static final Privilege KAFKA_HOST1_GROUP1_READ =
+      create(new KeyValue("HOST", "host1"), new KeyValue("GROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.READ));
+  private static final Privilege KAFKA_HOST1_GROUP1_WRITE =
+      create(new KeyValue("HOST", "host1"), new KeyValue("GROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
 
   @Test
@@ -65,8 +65,8 @@ public class TestKafkaWildcardPrivilege {
     assertFalse(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_READ));
     assertFalse(KAFKA_HOST1_READ.implies(KAFKA_HOST1_WRITE));
     //consumer group
-    assertFalse(KAFKA_HOST1_CONSUMERGROUP1_WRITE.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
-    assertFalse(KAFKA_HOST1_CONSUMERGROUP1_READ.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
+    assertFalse(KAFKA_HOST1_GROUP1_WRITE.implies(KAFKA_HOST1_GROUP1_READ));
+    assertFalse(KAFKA_HOST1_GROUP1_READ.implies(KAFKA_HOST1_GROUP1_WRITE));
     //topic
     assertFalse(KAFKA_HOST1_TOPIC1_READ.implies(KAFKA_HOST1_TOPIC1_WRITE));
     assertFalse(KAFKA_HOST1_TOPIC1_WRITE.implies(KAFKA_HOST1_TOPIC1_READ));
@@ -95,12 +95,12 @@ public class TestKafkaWildcardPrivilege {
     assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_CLUSTER1_WRITE));
 
     //consumer group
-    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_ALL));
-    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_GROUP1_ALL));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_GROUP1_READ));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_GROUP1_WRITE));
 
-    assertTrue(KAFKA_HOST1_READ.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_READ.implies(KAFKA_HOST1_GROUP1_READ));
+    assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_GROUP1_WRITE));
   }
 
   @Test
@@ -118,8 +118,8 @@ public class TestKafkaWildcardPrivilege {
     assertTrue(KAFKA_HOST1_CLUSTER1_ALL.implies(KAFKA_HOST1_CLUSTER1_WRITE));
 
     //consumer group
-    assertTrue(KAFKA_HOST1_CONSUMERGROUP1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_HOST1_CONSUMERGROUP1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_GROUP1_ALL.implies(KAFKA_HOST1_GROUP1_READ));
+    assertTrue(KAFKA_HOST1_GROUP1_ALL.implies(KAFKA_HOST1_GROUP1_WRITE));
   }
 
   @Test

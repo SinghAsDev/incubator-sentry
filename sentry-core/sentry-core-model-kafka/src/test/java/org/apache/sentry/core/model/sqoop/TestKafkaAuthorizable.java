@@ -46,7 +46,7 @@ public class TestKafkaAuthorizable {
 
   @Test
   public void testAuthType() throws Exception {
-    Host host = new Host("server1");
+    Host host = new Host("host1");
     Assert.assertEquals(host.getAuthzType(), AuthorizableType.HOST);
 
     Cluster cluster = new Cluster("cluster1");

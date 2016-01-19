@@ -61,7 +61,7 @@ public class TestKafkaPolicyEngineDFS extends AbstractTestKafkaPolicyEngine {
   }
 
   @Override
-  protected void  afterSetup() throws IOException {
+  protected void afterSetup() throws IOException {
     fileSystem.delete(etc, true);
     fileSystem.mkdirs(etc);
     PolicyFiles.copyToDir(fileSystem, etc, "test-authz-provider.ini");
