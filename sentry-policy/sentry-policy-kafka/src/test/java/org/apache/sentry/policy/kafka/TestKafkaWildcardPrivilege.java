@@ -30,96 +30,96 @@ import org.apache.sentry.provider.common.KeyValue;
 import org.junit.Test;
 
 public class TestKafkaWildcardPrivilege {
-  private static final Privilege KAFKA_SERVER1_ALL =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("action", KafkaActionConstant.ALL));
-  private static final Privilege KAFKA_SERVER1_READ =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("action", KafkaActionConstant.READ));
-  private static final Privilege KAFKA_SERVER1_WRITE =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("action", KafkaActionConstant.WRITE));
+  private static final Privilege KAFKA_HOST1_ALL =
+      create(new KeyValue("HOST", "host1"), new KeyValue("action", KafkaActionConstant.ALL));
+  private static final Privilege KAFKA_HOST1_READ =
+      create(new KeyValue("HOST", "host1"), new KeyValue("action", KafkaActionConstant.READ));
+  private static final Privilege KAFKA_HOST1_WRITE =
+      create(new KeyValue("HOST", "host1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
-  private static final Privilege KAFKA_SERVER1_TOPIC1_ALL =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.ALL));
-  private static final Privilege KAFKA_SERVER1_TOPIC1_READ =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.READ));
-  private static final Privilege KAFKA_SERVER1_TOPIC1_WRITE =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.WRITE));
+  private static final Privilege KAFKA_HOST1_TOPIC1_ALL =
+      create(new KeyValue("HOST", "host1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.ALL));
+  private static final Privilege KAFKA_HOST1_TOPIC1_READ =
+      create(new KeyValue("HOST", "host1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.READ));
+  private static final Privilege KAFKA_HOST1_TOPIC1_WRITE =
+      create(new KeyValue("HOST", "host1"), new KeyValue("TOPIC", "topic1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
-  private static final Privilege KAFKA_SERVER1_CLUSTER1_ALL =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.ALL));
-  private static final Privilege KAFKA_SERVER1_CLUSTER1_READ =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.READ));
-  private static final Privilege KAFKA_SERVER1_CLUSTER1_WRITE =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.WRITE));
+  private static final Privilege KAFKA_HOST1_CLUSTER1_ALL =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.ALL));
+  private static final Privilege KAFKA_HOST1_CLUSTER1_READ =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.READ));
+  private static final Privilege KAFKA_HOST1_CLUSTER1_WRITE =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CLUSTER", "cluster1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
-  private static final Privilege KAFKA_SERVER1_CONSUMERGROUP1_ALL =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.ALL));
-  private static final Privilege KAFKA_SERVER1_CONSUMERGROUP1_READ =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.READ));
-  private static final Privilege KAFKA_SERVER1_CONSUMERGROUP1_WRITE =
-      create(new KeyValue("SERVER", "server1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.WRITE));
+  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_ALL =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.ALL));
+  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_READ =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.READ));
+  private static final Privilege KAFKA_HOST1_CONSUMERGROUP1_WRITE =
+      create(new KeyValue("HOST", "host1"), new KeyValue("CONSUMERGROUP", "cgroup1"), new KeyValue("action", KafkaActionConstant.WRITE));
 
 
   @Test
   public void testSimpleAction() throws Exception {
-    //server
-    assertFalse(KAFKA_SERVER1_WRITE.implies(KAFKA_SERVER1_READ));
-    assertFalse(KAFKA_SERVER1_READ.implies(KAFKA_SERVER1_WRITE));
+    //host
+    assertFalse(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_READ));
+    assertFalse(KAFKA_HOST1_READ.implies(KAFKA_HOST1_WRITE));
     //consumer group
-    assertFalse(KAFKA_SERVER1_CONSUMERGROUP1_WRITE.implies(KAFKA_SERVER1_CONSUMERGROUP1_READ));
-    assertFalse(KAFKA_SERVER1_CONSUMERGROUP1_READ.implies(KAFKA_SERVER1_CONSUMERGROUP1_WRITE));
+    assertFalse(KAFKA_HOST1_CONSUMERGROUP1_WRITE.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
+    assertFalse(KAFKA_HOST1_CONSUMERGROUP1_READ.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
     //topic
-    assertFalse(KAFKA_SERVER1_TOPIC1_READ.implies(KAFKA_SERVER1_TOPIC1_WRITE));
-    assertFalse(KAFKA_SERVER1_TOPIC1_WRITE.implies(KAFKA_SERVER1_TOPIC1_READ));
+    assertFalse(KAFKA_HOST1_TOPIC1_READ.implies(KAFKA_HOST1_TOPIC1_WRITE));
+    assertFalse(KAFKA_HOST1_TOPIC1_WRITE.implies(KAFKA_HOST1_TOPIC1_READ));
     //cluster
-    assertFalse(KAFKA_SERVER1_CLUSTER1_READ.implies(KAFKA_SERVER1_CLUSTER1_WRITE));
-    assertFalse(KAFKA_SERVER1_CLUSTER1_WRITE.implies(KAFKA_SERVER1_CLUSTER1_READ));
+    assertFalse(KAFKA_HOST1_CLUSTER1_READ.implies(KAFKA_HOST1_CLUSTER1_WRITE));
+    assertFalse(KAFKA_HOST1_CLUSTER1_WRITE.implies(KAFKA_HOST1_CLUSTER1_READ));
   }
 
   @Test
   public void testShorterThanRequest() throws Exception {
     //topic
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_TOPIC1_ALL));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_TOPIC1_READ));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_TOPIC1_WRITE));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_TOPIC1_ALL));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_TOPIC1_READ));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_TOPIC1_WRITE));
 
-    assertFalse(KAFKA_SERVER1_WRITE.implies(KAFKA_SERVER1_READ));
-    assertTrue(KAFKA_SERVER1_READ.implies(KAFKA_SERVER1_TOPIC1_READ));
-    assertTrue(KAFKA_SERVER1_WRITE.implies(KAFKA_SERVER1_TOPIC1_WRITE));
+    assertFalse(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_READ));
+    assertTrue(KAFKA_HOST1_READ.implies(KAFKA_HOST1_TOPIC1_READ));
+    assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_TOPIC1_WRITE));
 
     //cluster
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CLUSTER1_ALL));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CLUSTER1_READ));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CLUSTER1_WRITE));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CLUSTER1_ALL));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CLUSTER1_READ));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CLUSTER1_WRITE));
 
-    assertTrue(KAFKA_SERVER1_READ.implies(KAFKA_SERVER1_CLUSTER1_READ));
-    assertTrue(KAFKA_SERVER1_WRITE.implies(KAFKA_SERVER1_CLUSTER1_WRITE));
+    assertTrue(KAFKA_HOST1_READ.implies(KAFKA_HOST1_CLUSTER1_READ));
+    assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_CLUSTER1_WRITE));
 
     //consumer group
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CONSUMERGROUP1_ALL));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_ALL));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
 
-    assertTrue(KAFKA_SERVER1_READ.implies(KAFKA_SERVER1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_SERVER1_WRITE.implies(KAFKA_SERVER1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_READ.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
+    assertTrue(KAFKA_HOST1_WRITE.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
   }
 
   @Test
   public void testActionAll() throws Exception {
-    //server
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_READ));
-    assertTrue(KAFKA_SERVER1_ALL.implies(KAFKA_SERVER1_WRITE));
+    //host
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_READ));
+    assertTrue(KAFKA_HOST1_ALL.implies(KAFKA_HOST1_WRITE));
 
     //topic
-    assertTrue(KAFKA_SERVER1_TOPIC1_ALL.implies(KAFKA_SERVER1_TOPIC1_READ));
-    assertTrue(KAFKA_SERVER1_TOPIC1_ALL.implies(KAFKA_SERVER1_TOPIC1_WRITE));
+    assertTrue(KAFKA_HOST1_TOPIC1_ALL.implies(KAFKA_HOST1_TOPIC1_READ));
+    assertTrue(KAFKA_HOST1_TOPIC1_ALL.implies(KAFKA_HOST1_TOPIC1_WRITE));
 
     //cluster
-    assertTrue(KAFKA_SERVER1_CLUSTER1_ALL.implies(KAFKA_SERVER1_CLUSTER1_READ));
-    assertTrue(KAFKA_SERVER1_CLUSTER1_ALL.implies(KAFKA_SERVER1_CLUSTER1_WRITE));
+    assertTrue(KAFKA_HOST1_CLUSTER1_ALL.implies(KAFKA_HOST1_CLUSTER1_READ));
+    assertTrue(KAFKA_HOST1_CLUSTER1_ALL.implies(KAFKA_HOST1_CLUSTER1_WRITE));
 
     //consumer group
-    assertTrue(KAFKA_SERVER1_CONSUMERGROUP1_ALL.implies(KAFKA_SERVER1_CONSUMERGROUP1_READ));
-    assertTrue(KAFKA_SERVER1_CONSUMERGROUP1_ALL.implies(KAFKA_SERVER1_CONSUMERGROUP1_WRITE));
+    assertTrue(KAFKA_HOST1_CONSUMERGROUP1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_READ));
+    assertTrue(KAFKA_HOST1_CONSUMERGROUP1_ALL.implies(KAFKA_HOST1_CONSUMERGROUP1_WRITE));
   }
 
   @Test
@@ -130,7 +130,7 @@ public class TestKafkaWildcardPrivilege {
         return false;
       }
     };
-    Privilege topic1 = create(new KeyValue("SERVER", "server"), new KeyValue("TOPIC", "topic1"));
+    Privilege topic1 = create(new KeyValue("HOST", "host"), new KeyValue("TOPIC", "topic1"));
     assertFalse(topic1.implies(null));
     assertFalse(topic1.implies(p));
     assertFalse(topic1.equals(null));
@@ -149,18 +149,18 @@ public class TestKafkaWildcardPrivilege {
 
   @Test(expected=IllegalArgumentException.class)
   public void testEmptyKey() throws Exception {
-    System.out.println(create(KV_JOINER.join("", "server1")));
+    System.out.println(create(KV_JOINER.join("", "host1")));
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testEmptyValue() throws Exception {
-    System.out.println(create(KV_JOINER.join("SERVER", "")));
+    System.out.println(create(KV_JOINER.join("HOST", "")));
   }
 
   @Test(expected=IllegalArgumentException.class)
   public void testEmptyPart() throws Exception {
     System.out.println(create(AUTHORIZABLE_JOINER.
-        join(KV_JOINER.join("SERVER", "server1"), "")));
+        join(KV_JOINER.join("HOST", "host1"), "")));
   }
 
   @Test(expected=IllegalArgumentException.class)

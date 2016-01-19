@@ -24,7 +24,7 @@ import java.util.List;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaAuthorizable;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.apache.sentry.policy.common.PrivilegeValidator;
 import org.apache.sentry.policy.common.PrivilegeValidatorContext;
@@ -44,7 +44,7 @@ public class ResourceRequiredMatch implements PrivilegeValidator {
     boolean hostnameMatched = false;
     boolean resourceMatched = false;
     for (KafkaAuthorizable authorizable : authorizables) {
-      if (authorizable instanceof Server) {
+      if (authorizable instanceof Host) {
         hostnameMatched = true;
       } else if (authorizable instanceof Cluster || authorizable instanceof ConsumerGroup
           || authorizable instanceof Topic) {

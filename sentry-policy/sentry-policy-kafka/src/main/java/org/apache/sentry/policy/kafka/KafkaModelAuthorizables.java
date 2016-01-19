@@ -20,7 +20,7 @@ import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaAuthorizable;
 import org.apache.sentry.core.model.kafka.KafkaAuthorizable.AuthorizableType;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.apache.sentry.provider.common.KeyValue;
 
@@ -42,8 +42,8 @@ public class KafkaModelAuthorizables {
 
   public static KafkaAuthorizable from(AuthorizableType type, String name) {
     switch(type) {
-    case SERVER:
-      return new Server(name);
+    case HOST:
+      return new Host(name);
     case CLUSTER:
       return new Cluster(name);
     case TOPIC:

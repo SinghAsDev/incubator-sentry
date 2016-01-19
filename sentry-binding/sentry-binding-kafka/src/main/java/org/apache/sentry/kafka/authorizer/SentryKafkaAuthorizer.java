@@ -88,43 +88,6 @@ public class SentryKafkaAuthorizer implements Authorizer {
     return binding.authorize(session, operation, resource);
   }
 
-  private boolean isSuperUser(KafkaPrincipal user) {
-    for (KafkaPrincipal superUser : super_users) {
-      if (superUser.equals(user)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public void addRole(final String role) {
-    if (roleExists(role)) {
-      throw new KafkaException("Can not create an existing role, " + role + ", again.");
-    }
-
-    final UserGroupInformation loginUser = getLoginUser();
-    execute(new Command<Void>() {
-      @Override
-      public Void run(SentryGenericServiceClient client) throws Exception {
-        client.createRole(
-            loginUser.getShortUserName(), role, COMPONENT_NAME);
-        return null;
-      }
-    });
-  }
-
-  public void addRoleToGroups(final String role, final java.util.Set<String> groups) {
-    final UserGroupInformation loginUser = getLoginUser();
-    execute(new Command<Void>() {
-      @Override
-      public Void run(SentryGenericServiceClient client) throws Exception {
-        client.addRoleToGroups(
-            loginUser.getShortUserName(), role, COMPONENT_NAME, groups);
-        return null;
-      }
-    });
-  }
-
   @Override
   public void addAcls(Set<Acl> acls, final Resource resource) {
     verifyAcls(acls);
@@ -239,6 +202,48 @@ public class SentryKafkaAuthorizer implements Authorizer {
     this.kafkaAuthConf = instance.getKafkaAuthConf();
   }
 
+  public void addRole(final String role) {
+    if (roleExists(role)) {
+      throw new KafkaException("Can not create an existing role, " + role + ", again.");
+    }
+
+    final UserGroupInformation loginUser = getLoginUser();
+    execute(new Command<Void>() {
+      @Override
+      public Void run(SentryGenericServiceClient client) throws Exception {
+        client.createRole(
+            loginUser.getShortUserName(), role, COMPONENT_NAME);
+        return null;
+      }
+    });
+  }
+
+  public void addRoleToGroups(final String role, final java.util.Set<String> groups) {
+    final UserGroupInformation loginUser = getLoginUser();
+    execute(new Command<Void>() {
+      @Override
+      public Void run(SentryGenericServiceClient client) throws Exception {
+        client.addRoleToGroups(
+            loginUser.getShortUserName(), role, COMPONENT_NAME, groups);
+        return null;
+      }
+    });
+  }
+
+  public void dropAllRoles() {
+    final List<String> roles = getAllRoles();
+    final UserGroupInformation loginUser = getLoginUser();
+    execute(new Command<Void>() {
+      @Override
+      public Void run(SentryGenericServiceClient client) throws Exception {
+        for (String role: roles) {
+          client.dropRole(loginUser.getShortUserName(), role, COMPONENT_NAME);
+        }
+        return null;
+      }
+    });
+  }
+
   private void getSuperUsers(String kafkaSuperUsers) {
     super_users = new ArrayList<>();
     String[] superUsers = kafkaSuperUsers.split(";");
@@ -249,6 +254,15 @@ public class SentryKafkaAuthorizer implements Authorizer {
         LOG.debug("Adding " + trimmedUser + " to list of Kafka SuperUsers.");
       }
     }
+  }
+
+  private boolean isSuperUser(KafkaPrincipal user) {
+    for (KafkaPrincipal superUser : super_users) {
+      if (superUser.equals(user)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private List<String> getRolesforGroup(final String groupName) {
@@ -271,26 +285,12 @@ public class SentryKafkaAuthorizer implements Authorizer {
     return SentryGenericServiceClientFactory.create(this.kafkaAuthConf);
   }
 
-  public void dropAllRoles() {
-    final List<String> roles = getAllRoles();
-    final UserGroupInformation loginUser = getLoginUser();
-    execute(new Command<Void>() {
-      @Override
-      public Void run(SentryGenericServiceClient client) throws Exception {
-        for (String role: roles) {
-          client.dropRole(loginUser.getShortUserName(), role, COMPONENT_NAME);
-        }
-        return null;
-      }
-    });
-  }
-
   /**
    * A Command is a closure used to pass a block of code from individual
    * functions to execute, which centralizes connection error
    * handling. Command is parameterized on the return type of the function.
    */
-  private static interface Command<T> {
+  private interface Command<T> {
     T run(SentryGenericServiceClient client) throws Exception;
   }
 
@@ -419,7 +419,7 @@ public class SentryKafkaAuthorizer implements Authorizer {
         String host = null;
         String operation = privilege.getAction();
         for (TAuthorizable tAuthorizable: authorizables) {
-          if (tAuthorizable.getType().equals(KafkaAuthorizable.AuthorizableType.SERVER.name())) {
+          if (tAuthorizable.getType().equals(KafkaAuthorizable.AuthorizableType.HOST.name())) {
             host = tAuthorizable.getName();
           } else {
             Resource resource = new Resource(ResourceType$.MODULE$.fromString(tAuthorizable.getType()), tAuthorizable.getName());

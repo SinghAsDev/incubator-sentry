@@ -35,7 +35,7 @@ import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
 import org.apache.sentry.core.model.kafka.KafkaActionFactory.KafkaAction;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.apache.sentry.policy.kafka.KafkaPolicyFileProviderBackend;
 import org.apache.sentry.policy.kafka.MockGroupMappingServiceProvider;
@@ -54,8 +54,8 @@ import com.google.common.io.Files;
 public class TestKafkaAuthorizationProviderGeneralCases {
   private static final Multimap<String, String> USER_TO_GROUP_MAP = HashMultimap.create();
 
-  private static final Server server1 = new Server("server1");
-  private static final Server server2 = new Server("server2");
+  private static final Host HOST_1 = new Host("server1");
+  private static final Host HOST_2 = new Host("server2");
   private static final Cluster cluster1 = new Cluster("kafka-cluster");
   private static final Topic topic1 = new Topic("t1");
   private static final Topic topic2 = new Topic("t2");
@@ -135,77 +135,77 @@ public class TestKafkaAuthorizationProviderGeneralCases {
   @Test
   public void testAdmin() throws Exception {
     
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1,cluster1), allActions, true);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1,topic1), allActions, true);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1,topic2), allActions, true);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1,cgroup1), allActions, true);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1,cgroup2), allActions, true);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server1), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1,cluster1), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1,topic1), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1,topic2), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1,cgroup1), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1,cgroup2), allActions, true);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_1), allActions, true);
     
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2,cluster1), allActions, false);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2,topic1), allActions, false);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2,topic2), allActions, false);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2,cgroup1), allActions, false);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2,cgroup2), allActions, false);
-    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(server2), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2,cluster1), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2,topic1), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2,topic2), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2,cgroup1), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2,cgroup2), allActions, false);
+    doTestResourceAuthorizationProvider(SUB_ADMIN, Arrays.asList(HOST_2), allActions, false);
     
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1,cluster1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1,topic1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1,topic2), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1,cgroup1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1,cgroup2), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1,cluster1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1,topic1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1,topic2), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1,cgroup1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1,cgroup2), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_1), allActions, true);
     
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2,cluster1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2,topic1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2,topic2), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2,cgroup1), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2,cgroup2), allActions, true);
-    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(server2), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2,cluster1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2,topic1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2,topic2), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2,cgroup1), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2,cgroup2), allActions, true);
+    doTestResourceAuthorizationProvider(ADMIN, Arrays.asList(HOST_2), allActions, true);
   }
 
   @Test
   public void testConsumer() throws Exception {
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(CONSUMER0, Arrays.asList(server, topic1),
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(CONSUMER0, Arrays.asList(host, topic1),
             Sets.newHashSet(action), READ.equals(action));
     }
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(CONSUMER1, Arrays.asList(server, topic1),
-            Sets.newHashSet(action), server1.equals(server) && READ.equals(action));
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(CONSUMER1, Arrays.asList(host, topic1),
+            Sets.newHashSet(action), HOST_1.equals(host) && READ.equals(action));
     }
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(CONSUMER2, Arrays.asList(server, topic2),
-            Sets.newHashSet(action), server2.equals(server) && READ.equals(action));
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(CONSUMER2, Arrays.asList(host, topic2),
+            Sets.newHashSet(action), HOST_2.equals(host) && READ.equals(action));
     }
   }
 
   @Test
   public void testProducer() throws Exception {
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(PRODUCER0, Arrays.asList(server, topic1),
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(PRODUCER0, Arrays.asList(host, topic1),
             Sets.newHashSet(action), WRITE.equals(action));
     }
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(PRODUCER1, Arrays.asList(server, topic1),
-            Sets.newHashSet(action), server1.equals(server) && WRITE.equals(action));
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(PRODUCER1, Arrays.asList(host, topic1),
+            Sets.newHashSet(action), HOST_1.equals(host) && WRITE.equals(action));
     }
     for (KafkaAction action : allActions) {
-      for (Server server : Sets.newHashSet(server1, server2))
-        doTestResourceAuthorizationProvider(PRODUCER2, Arrays.asList(server, topic2),
-            Sets.newHashSet(action), server2.equals(server) && WRITE.equals(action));
+      for (Host host : Sets.newHashSet(HOST_1, HOST_2))
+        doTestResourceAuthorizationProvider(PRODUCER2, Arrays.asList(host, topic2),
+            Sets.newHashSet(action), HOST_2.equals(host) && WRITE.equals(action));
     }
   }
 
   @Test
   public void testConsumerProducer() throws Exception {
     for (KafkaAction action : allActions) {
-      doTestResourceAuthorizationProvider(CONSUMER_PRODUCER0, Arrays.asList(server1, topic1),
+      doTestResourceAuthorizationProvider(CONSUMER_PRODUCER0, Arrays.asList(HOST_1, topic1),
           Sets.newHashSet(action), true);
     }
   }

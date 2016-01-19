@@ -17,22 +17,22 @@
 package org.apache.sentry.core.model.kafka;
 
 /**
- * Represents the Server authorizable in the Kafka model
+ * Represents the Host authorizable in the Kafka model
  */
-public class Server implements KafkaAuthorizable {
+public class Host implements KafkaAuthorizable {
   /**
-   * Represents all servers
+   * Represents all hosts
    */
-  public static Server ALL = new Server(KafkaAuthorizable.ALL);
+  public static Host ALL = new Host(KafkaAuthorizable.ALL);
 
   private String name;
-  public Server(String name) {
+  public Host(String name) {
     this.name = name;
   }
 
   @Override
   public AuthorizableType getAuthzType() {
-    return AuthorizableType.SERVER;
+    return AuthorizableType.HOST;
   }
 
   @Override

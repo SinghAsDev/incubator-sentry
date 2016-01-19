@@ -28,7 +28,7 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.kafka.conf.KafkaAuthConf;
 import org.apache.sentry.provider.db.generic.SentryGenericProviderBackend;
 import org.apache.sentry.provider.db.generic.service.thrift.SentryGenericServiceClient;
@@ -172,8 +172,8 @@ public class AbstractKafkaSentryTestBase {
       sentryClient.createRoleIfNotExist(ADMIN_USER, ADMIN_ROLE, COMPONENT);
       sentryClient.addRoleToGroups(ADMIN_USER, ADMIN_ROLE, COMPONENT, Sets.newHashSet(ADMIN_GROUP));
       final ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-      Server server = new Server("127.0.0.1");
-      authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+      Host host = new Host("127.0.0.1");
+      authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
       Cluster cluster = new Cluster("kafka-cluster");
       authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
       sentryClient.grantPrivilege(ADMIN_USER, ADMIN_ROLE, COMPONENT,

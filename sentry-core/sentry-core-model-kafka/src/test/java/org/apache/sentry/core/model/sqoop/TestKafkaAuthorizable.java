@@ -22,7 +22,7 @@ import junit.framework.Assert;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaAuthorizable.AuthorizableType;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.junit.Test;
 
@@ -31,8 +31,8 @@ public class TestKafkaAuthorizable {
   @Test
   public void testSimpleName() throws Exception {
     String name = "simple";
-    Server server = new Server(name);
-    Assert.assertEquals(server.getName(), name);
+    Host host = new Host(name);
+    Assert.assertEquals(host.getName(), name);
 
     Cluster cluster = new Cluster(name);
     Assert.assertEquals(cluster.getName(), name);
@@ -46,8 +46,8 @@ public class TestKafkaAuthorizable {
 
   @Test
   public void testAuthType() throws Exception {
-    Server server = new Server("server1");
-    Assert.assertEquals(server.getAuthzType(), AuthorizableType.SERVER);
+    Host host = new Host("server1");
+    Assert.assertEquals(host.getAuthzType(), AuthorizableType.HOST);
 
     Cluster cluster = new Cluster("cluster1");
     Assert.assertEquals(cluster.getAuthzType(), AuthorizableType.CLUSTER);

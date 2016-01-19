@@ -32,7 +32,7 @@ import org.apache.kafka.common.config.SslConfigs;
 import org.apache.sentry.core.model.kafka.Cluster;
 import org.apache.sentry.core.model.kafka.ConsumerGroup;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.apache.sentry.provider.db.generic.service.thrift.SentryGenericServiceClient;
 import org.apache.sentry.provider.db.generic.service.thrift.TAuthorizable;
@@ -75,10 +75,10 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
         final String role = StaticUserGroupRole.ROLE_1;
         final String group = StaticUserGroupRole.GROUP_1;
 
-        // Allow SERVER=127.0.0.1->Topic=t1->action=describe
+        // Allow HOST=127.0.0.1->Topic=t1->action=describe
         ArrayList<TAuthorizable> authorizables = new ArrayList<TAuthorizable>();
-        Server server = new Server("127.0.0.1");
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        Host host = new Host("127.0.0.1");
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         Topic topic = new Topic("t1");
         authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
         addPermissions(role, group, KafkaActionConstant.DESCRIBE, authorizables);
@@ -89,9 +89,9 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access topics: [t1]");
         }
 
-        // Allow SERVER=127.0.0.1->Cluster=kafka-cluster->action=create
+        // Allow HOST=127.0.0.1->Cluster=kafka-cluster->action=create
         authorizables = new ArrayList<TAuthorizable>();
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         Cluster cluster = new Cluster("kafka-cluster");
         authorizables.add(new TAuthorizable(cluster.getTypeName(), cluster.getName()));
         addPermissions(role, group, KafkaActionConstant.CREATE, authorizables);
@@ -102,9 +102,9 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access topics: [t1]");
         }
 
-        // Allow SERVER=127.0.0.1->Topic=t1->action=write
+        // Allow HOST=127.0.0.1->Topic=t1->action=write
         authorizables = new ArrayList<TAuthorizable>();
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
         addPermissions(role, group, KafkaActionConstant.WRITE, authorizables);
         try{
@@ -121,9 +121,9 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access group: SentryKafkaConsumer");
         }
 
-        // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=describe
+        // HOST=127.0.0.1->Group=SentryKafkaConsumer->action=describe
         authorizables = new ArrayList<TAuthorizable>();
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         ConsumerGroup consumerGroup = new ConsumerGroup("SentryKafkaConsumer");
         authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
         addPermissions(role, group, KafkaActionConstant.DESCRIBE, authorizables);
@@ -134,9 +134,9 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access group: SentryKafkaConsumer");
         }
 
-        // SERVER=127.0.0.1->Group=SentryKafkaConsumer->action=read
+        // HOST=127.0.0.1->Group=SentryKafkaConsumer->action=read
         authorizables = new ArrayList<TAuthorizable>();
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         authorizables.add(new TAuthorizable(consumerGroup.getTypeName(), consumerGroup.getName()));
         addPermissions(role, group, KafkaActionConstant.READ, authorizables);
         try {
@@ -146,9 +146,9 @@ public class TestAuthorize extends AbstractKafkaSentryTestBase {
             assertCausedMessage(ex, "Not authorized to access topics: [t1]");
         }
 
-        // SERVER=127.0.0.1->Topic=t1->action=read
+        // HOST=127.0.0.1->Topic=t1->action=read
         authorizables = new ArrayList<TAuthorizable>();
-        authorizables.add(new TAuthorizable(server.getTypeName(), server.getName()));
+        authorizables.add(new TAuthorizable(host.getTypeName(), host.getName()));
         authorizables.add(new TAuthorizable(topic.getTypeName(), topic.getName()));
         addPermissions(role, group, KafkaActionConstant.READ, authorizables);
         testConsume("user1");

@@ -21,16 +21,15 @@ package org.apache.sentry.policy.kafka;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 
-import org.apache.sentry.core.model.kafka.Server;
-import org.apache.sentry.policy.kafka.KafkaModelAuthorizables;
+import org.apache.sentry.core.model.kafka.Host;
 import org.junit.Test;
 
 public class TestKafkaModelAuthorizables {
 
   @Test
-  public void testServer() throws Exception {
-    Server server1 = (Server)KafkaModelAuthorizables.from("SERVER=server1");
-    assertEquals("server1", server1.getName());
+  public void testHost() throws Exception {
+    Host host1 = (Host)KafkaModelAuthorizables.from("SERVER=server1");
+    assertEquals("server1", host1.getName());
   }
 
   @Test(expected=IllegalArgumentException.class)

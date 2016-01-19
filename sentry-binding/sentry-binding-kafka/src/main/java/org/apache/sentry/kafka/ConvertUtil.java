@@ -21,7 +21,7 @@ import java.util.List;
 import kafka.security.auth.Resource;
 
 import org.apache.sentry.core.common.Authorizable;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 
 import com.google.common.collect.Lists;
 
@@ -30,7 +30,7 @@ public class ConvertUtil {
   public static List<Authorizable> convertResourceToAuthorizable(String hostname,
       final Resource resource) {
     List<Authorizable> authorizables = Lists.newArrayList();
-    authorizables.add(new Server(hostname));
+    authorizables.add(new Host(hostname));
     authorizables.add(new Authorizable() {
       @Override
       public String getTypeName() {

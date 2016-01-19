@@ -32,7 +32,7 @@ import org.apache.sentry.core.common.Authorizable;
 import org.apache.sentry.core.common.Subject;
 import org.apache.sentry.core.model.kafka.KafkaActionConstant;
 import org.apache.sentry.core.model.kafka.KafkaActionFactory.KafkaAction;
-import org.apache.sentry.core.model.kafka.Server;
+import org.apache.sentry.core.model.kafka.Host;
 import org.apache.sentry.core.model.kafka.Topic;
 import org.apache.sentry.policy.kafka.KafkaPolicyFileProviderBackend;
 import org.apache.sentry.provider.common.AuthorizationProvider;
@@ -70,7 +70,7 @@ public class TestKafkaAuthorizationProviderSpecialCases {
   @Test
   public void testDuplicateEntries() throws Exception {
     Subject user1 = new Subject("user1");
-    Server server1 = new Server("server1");
+    Host host1 = new Host("server1");
     Topic topic1 = new Topic("t1");
     Set<? extends Action> actions = Sets.newHashSet(new KafkaAction(KafkaActionConstant.READ));
     policyFile.addGroupsToUser(user1.getName(), true, "group1", "group1")
@@ -80,7 +80,7 @@ public class TestKafkaAuthorizationProviderSpecialCases {
     policyFile.write(iniFile);
     KafkaPolicyFileProviderBackend policy = new KafkaPolicyFileProviderBackend(initResource);
     authzProvider = new LocalGroupResourceAuthorizationProvider(initResource, policy);
-    List<? extends Authorizable> authorizableHierarchy = ImmutableList.of(server1, topic1);
+    List<? extends Authorizable> authorizableHierarchy = ImmutableList.of(host1, topic1);
     Assert.assertTrue(authorizableHierarchy.toString(),
         authzProvider.hasAccess(user1, authorizableHierarchy, actions, ActiveRoleSet.ALL));
   }

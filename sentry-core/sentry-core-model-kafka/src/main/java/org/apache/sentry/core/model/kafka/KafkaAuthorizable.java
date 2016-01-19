@@ -26,7 +26,7 @@ public interface KafkaAuthorizable extends Authorizable {
   public static final String ALL = "*";
   public enum AuthorizableType {
     CLUSTER,
-    SERVER,
+    HOST,
     TOPIC,
     GROUP
   };

@@ -28,9 +28,9 @@ import org.junit.Test;
 public class TestResourceNameRequiredMatch {
   @Test
   public void testWithoutResourceName() {
-    ResourceRequiredMatch serverNameMatch = new ResourceRequiredMatch();
+    ResourceRequiredMatch hostNameMatch = new ResourceRequiredMatch();
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("server=server1"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1"));
     } catch (ConfigurationException ex) {
       Assert.fail("Not expected ConfigurationException");
     }
@@ -38,38 +38,38 @@ public class TestResourceNameRequiredMatch {
 
   @Test
   public void testWithoutServerName() throws Exception {
-    ResourceRequiredMatch serverNameMatch = new ResourceRequiredMatch();
+    ResourceRequiredMatch hostNameMatch = new ResourceRequiredMatch();
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("connector=c1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("connector=c1->action=read"));
       Assert.fail("Expected ConfigurationException");
     } catch (ConfigurationException ex) {
     }
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("topic=t1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("topic=t1->action=read"));
       Assert.fail("Expected ConfigurationException");
     } catch (ConfigurationException ex) {
     }
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("consumer_group=g1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("consumer_group=g1->action=read"));
       Assert.fail("Expected ConfigurationException");
     } catch (ConfigurationException ex) {
     }
   }
   @Test
   public void testServerNameMatch() throws Exception {
-    ResourceRequiredMatch serverNameMatch = new ResourceRequiredMatch();
+    ResourceRequiredMatch hostNameMatch = new ResourceRequiredMatch();
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("server=server1->cluster=c1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1->cluster=c1->action=read"));
     } catch (ConfigurationException ex) {
       Assert.fail("Not expected ConfigurationException");
     }
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("server=server1->topic=t1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1->topic=t1->action=read"));
     } catch (ConfigurationException ex) {
       Assert.fail("Not expected ConfigurationException");
     }
     try {
-      serverNameMatch.validate(new PrivilegeValidatorContext("server=server1->consumer_group=g1->action=read"));
+      hostNameMatch.validate(new PrivilegeValidatorContext("host=host1->consumer_group=g1->action=read"));
     } catch (ConfigurationException ex) {
       Assert.fail("Not expected ConfigurationException");
     }
