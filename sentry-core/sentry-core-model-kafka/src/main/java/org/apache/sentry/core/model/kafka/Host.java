@@ -23,11 +23,6 @@ public class Host implements KafkaAuthorizable {
   private String name;
 
   /**
-   * Represents all hosts.
-   */
-  public static Host ALL = new Host(KafkaAuthorizable.ALL);
-
-  /**
    * Create a Kafka's Host authorizable of a given string representation.
    *
    * @param name String representation of host.

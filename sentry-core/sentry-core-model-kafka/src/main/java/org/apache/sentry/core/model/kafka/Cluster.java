@@ -23,11 +23,6 @@ public class Cluster implements KafkaAuthorizable {
   private String name;
 
   /**
-   * Represents all Kafka clusters
-   */
-  public static final Cluster ALL = new Cluster(KafkaAuthorizable.ALL);
-
-  /**
    * Create a Cluster authorizable for Kafka cluster of a given name.
    *
    * @param name Name of Kafka cluster.

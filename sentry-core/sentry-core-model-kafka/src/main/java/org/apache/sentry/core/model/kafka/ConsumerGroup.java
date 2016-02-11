@@ -22,11 +22,6 @@ public class ConsumerGroup implements KafkaAuthorizable {
   private String name;
 
   /**
-   * Represents all consumer groups in a Kafka cluster.
-   */
-  public static ConsumerGroup ALL = new ConsumerGroup(KafkaAuthorizable.ALL);
-
-  /**
    * Create a Consumer-Group authorizable for Kafka cluster of a given name.
    *
    * @param name Name of Consumer-Group in a Kafka cluster.

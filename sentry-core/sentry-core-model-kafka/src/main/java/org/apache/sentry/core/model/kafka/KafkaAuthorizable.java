@@ -41,8 +41,6 @@ import org.apache.sentry.core.common.Authorizable;
  *                  querying offset for a partition for a particular consumer group.
  */
 public interface KafkaAuthorizable extends Authorizable {
-  public static final String ALL = "*"; // NOPMD - TODO(sdp) Remove before merge
-
   /**
    * Types of resources that Kafka supports authorization on.
    */

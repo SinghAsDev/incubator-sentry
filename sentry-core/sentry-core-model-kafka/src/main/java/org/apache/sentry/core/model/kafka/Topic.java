@@ -22,11 +22,6 @@ public class Topic implements KafkaAuthorizable {
   private String name;
 
   /**
-   * Represents all topics
-   */
-  public static Topic ALL = new Topic(KafkaAuthorizable.ALL);
-
-  /**
    * Create a Topic authorizable for Kafka cluster of a given name.
    *
    * @param name Name of Kafka topic.

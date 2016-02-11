@@ -45,7 +45,7 @@ public class KafkaActionFactory extends BitFieldActionFactory {
   /**
    * Types of actions supported by Kafka.
    */
-  enum KafkaActionType {
+  public enum KafkaActionType {
     READ(KafkaActionConstant.READ, 1),
     WRITE(KafkaActionConstant.WRITE, 2),
     CREATE(KafkaActionConstant.CREATE, 4),

@@ -115,23 +115,19 @@ public class KafkaWildcardPrivilege implements Privilege {
     // authorized based on the host request originated from and to handle this, Sentry uses host as
     // a resource. Kafka allows using '*' as wildcard for all hosts. '*' however is not a valid
     // Kafka action.
-    if (checkHostWidCard(policyPart)) {
+    if (hasHostWidCard(policyPart)) {
       return true;
     }
 
-    if(policyPart.getValue().equalsIgnoreCase(KafkaActionConstant.ALL) ||
-        policyPart.equals(requestPart)) {
-      return true;
-    } else if (!KafkaActionConstant.actionName.equalsIgnoreCase(policyPart.getKey())
-        && KafkaActionConstant.ALL.equalsIgnoreCase(requestPart.getValue())) {
-      /* privilege request is to match with any object of given type */
-      return true;
+    if (KafkaActionConstant.actionName.equalsIgnoreCase(policyPart.getKey())) { // is action
+      return policyPart.getValue().equalsIgnoreCase(KafkaActionConstant.ALL) ||
+          policyPart.equals(requestPart);
+    } else {
+      return policyPart.getValue().equals(requestPart.getValue());
     }
-    return false;
-
   }
 
-  private boolean checkHostWidCard(KeyValue policyPart) {
+  private boolean hasHostWidCard(KeyValue policyPart) {
     if (policyPart.getKey().equalsIgnoreCase(KafkaAuthorizable.AuthorizableType.HOST.toString()) &&
         policyPart.getValue().equalsIgnoreCase(ALL_HOSTS)) {
       return true;
