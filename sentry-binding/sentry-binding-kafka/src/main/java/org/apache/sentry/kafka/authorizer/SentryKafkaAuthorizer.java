@@ -202,6 +202,7 @@ public class SentryKafkaAuthorizer implements Authorizer {
     this.kafkaAuthConf = instance.getKafkaAuthConf();
   }
 
+  @Override
   public void addRole(final String role) {
     if (roleExists(role)) {
       throw new KafkaException("Can not create an existing role, " + role + ", again.");
@@ -218,13 +219,14 @@ public class SentryKafkaAuthorizer implements Authorizer {
     });
   }
 
-  public void addRoleToGroups(final String role, final java.util.Set<String> groups) {
+  @Override
+  public void addRoleToGroups(final String role, final Set<String> groups) {
     final UserGroupInformation loginUser = getLoginUser();
     execute(new Command<Void>() {
       @Override
       public Void run(SentryGenericServiceClient client) throws Exception {
         client.addRoleToGroups(
-            loginUser.getShortUserName(), role, COMPONENT_NAME, groups);
+            loginUser.getShortUserName(), role, COMPONENT_NAME, JavaConversions.setAsJavaSet(groups));
         return null;
       }
     });
