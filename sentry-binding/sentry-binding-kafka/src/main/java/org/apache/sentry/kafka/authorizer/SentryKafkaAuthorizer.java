@@ -25,6 +25,7 @@ import kafka.security.auth.Operation;
 import kafka.security.auth.Operation$;
 import kafka.security.auth.Resource;
 import kafka.security.auth.ResourceType$;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.kafka.common.KafkaException;
 import org.apache.kafka.common.security.auth.KafkaPrincipal;
@@ -332,6 +333,10 @@ public class SentryKafkaAuthorizer implements Authorizer {
   private UserGroupInformation getLoginUser() {
     UserGroupInformation loginUser = null;
     try {
+      Configuration conf = new Configuration();
+      conf.set("hadoop.security.authentication", UserGroupInformation.AuthenticationMethod.KERBEROS.name());
+      conf.set("com.sun.security.auth.module.Krb5LoginModule", "required");
+      UserGroupInformation.setConfiguration(conf);
       loginUser = UserGroupInformation.getLoginUser();
     } catch (IOException e) {
       throw new KafkaException("Failed to get login user information.", e);
