@@ -45,7 +45,7 @@ public class KafkaModelAuthorizables {
       case HOST:
         return new Host(name);
       case CLUSTER:
-        return new Cluster(name);
+        return new Cluster();
       case TOPIC:
         return new Topic(name);
       case CONSUMERGROUP:

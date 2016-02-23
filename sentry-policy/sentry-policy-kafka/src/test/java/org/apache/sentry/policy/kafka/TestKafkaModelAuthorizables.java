@@ -60,8 +60,8 @@ public class TestKafkaModelAuthorizables {
     Host host1 = (Host)KafkaModelAuthorizables.from("HOST=Host1");
     assertEquals("Host1", host1.getName());
 
-    Cluster cluster1 = (Cluster)KafkaModelAuthorizables.from("Cluster=cLuster1");
-    assertEquals("cLuster1", cluster1.getName());
+    Cluster cluster1 = (Cluster)KafkaModelAuthorizables.from("Cluster=kafka-cluster");
+    assertEquals("kafka-cluster", cluster1.getName());
 
     Topic topic1 = (Topic)KafkaModelAuthorizables.from("topic=topiC1");
     assertEquals("topiC1", topic1.getName());
